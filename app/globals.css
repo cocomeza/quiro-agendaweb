@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Animaciones para Toast */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* Mejoras de accesibilidad - tamaños de fuente más grandes por defecto */
+body {
+  font-size: 16px;
+}
+
+/* Botones más grandes para mejor usabilidad */
+button {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Mejor contraste para inputs */
+input, select, textarea {
+  font-size: 16px; /* Previene zoom en iOS */
+}
+
+/* Estilos para impresión */
+@media print {
+  @page {
+    margin: 1cm;
+    size: A4;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-agenda,
+  .print-agenda * {
+    visibility: visible;
+  }
+  
+  .print-agenda {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white;
+  }
+  
+  .no-print,
+  .no-print * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  button, 
+  .no-print-button,
+  nav,
+  header,
+  .border-b,
+  .shadow {
+    display: none !important;
+  }
+
+  /* Mejorar legibilidad en impresión */
+  .print-agenda table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  .print-agenda th,
+  .print-agenda td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+
+  .print-agenda th {
+    background-color: #f3f4f6 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Asegurar que los colores se impriman */
+  .print-agenda {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
