@@ -4,7 +4,6 @@ const nextConfig: NextConfig = {
   // Configuración optimizada para Vercel
   output: 'standalone', // Optimiza el build para producción
   reactStrictMode: true, // Habilita React Strict Mode
-  swcMinify: true, // Usa SWC para minificación (más rápido)
   
   // Configuración de imágenes (si se usan en el futuro)
   images: {

@@ -86,8 +86,9 @@ async function analyzeAppointmentsCSV() {
     process.exit(1);
   }
 
-  console.log(`\n📋 Columnas encontradas (${Object.keys(result.data[0]).length}):`);
-  const columns = Object.keys(result.data[0]);
+  const firstRow = result.data[0] as Record<string, unknown>;
+  console.log(`\n📋 Columnas encontradas (${Object.keys(firstRow).length}):`);
+  const columns = Object.keys(firstRow);
   columns.forEach((col, index) => {
     console.log(`   ${index + 1}. "${col}"`);
   });
