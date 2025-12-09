@@ -5,22 +5,26 @@ import { format, addDays } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
 import type { TurnoConPaciente, Paciente } from '@/lib/supabase/types';
 import AgendaDiaria from './AgendaDiaria';
+import VistaCalendario from './VistaCalendario';
 import ModalTurno from './ModalTurno';
 import ModalPaciente from './ModalPaciente';
 import ListaPacientes from './ListaPacientes';
 import SeguimientoPacientes from './SeguimientoPacientes';
 import FichaMedica from './FichaMedica';
-import { Calendar, Users, LogOut, TrendingUp } from 'lucide-react';
+import { Calendar, Users, LogOut, TrendingUp, Grid3x3, List } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { startOfMonth, endOfMonth } from 'date-fns';
 
 // Tipos ya importados desde @/lib/supabase/types
 
 export default function AgendaPage() {
   const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date());
   const [turnos, setTurnos] = useState<TurnoConPaciente[]>([]);
+  const [turnosMes, setTurnosMes] = useState<TurnoConPaciente[]>([]);
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [loading, setLoading] = useState(true);
   const [vista, setVista] = useState<'agenda' | 'pacientes' | 'seguimiento'>('agenda');
+  const [vistaAgenda, setVistaAgenda] = useState<'diaria' | 'calendario'>('diaria');
   const [modalTurnoAbierto, setModalTurnoAbierto] = useState(false);
   const [modalPacienteAbierto, setModalPacienteAbierto] = useState(false);
   const [fichaMedicaAbierta, setFichaMedicaAbierta] = useState(false);
@@ -31,6 +35,7 @@ export default function AgendaPage() {
 
   useEffect(() => {
     cargarDatos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fechaSeleccionada]);
 
   // Limpiar modales cuando se cierran
@@ -60,6 +65,19 @@ export default function AgendaPage() {
 
       if (turnosError) throw turnosError;
 
+      // Cargar turnos del mes para la vista calendario
+      const inicioMes = startOfMonth(fechaSeleccionada);
+      const finMes = endOfMonth(fechaSeleccionada);
+      const { data: turnosMesData, error: turnosMesError } = await supabase
+        .from('turnos')
+        .select('*, pacientes(*)')
+        .gte('fecha', format(inicioMes, 'yyyy-MM-dd'))
+        .lte('fecha', format(finMes, 'yyyy-MM-dd'))
+        .order('fecha', { ascending: true })
+        .order('hora', { ascending: true });
+
+      if (turnosMesError) throw turnosMesError;
+
       // Cargar todos los pacientes
       const { data: pacientesData, error: pacientesError } = await supabase
         .from('pacientes')
@@ -75,7 +93,13 @@ export default function AgendaPage() {
         pacientes: Array.isArray(turno.pacientes) ? turno.pacientes[0] : turno.pacientes,
       }));
 
+      const turnosMesMapeados: TurnoConPaciente[] = (turnosMesData || []).map((turno: any) => ({
+        ...turno,
+        pacientes: Array.isArray(turno.pacientes) ? turno.pacientes[0] : turno.pacientes,
+      }));
+
       setTurnos(turnosMapeados);
+      setTurnosMes(turnosMesMapeados);
       setPacientes((pacientesData as Paciente[]) || []);
       // Logger removido para producción
     } catch (error: unknown) {
@@ -127,6 +151,11 @@ export default function AgendaPage() {
 
   const cambiarFecha = (dias: number) => {
     setFechaSeleccionada(addDays(fechaSeleccionada, dias));
+  };
+
+  const seleccionarFecha = (fecha: Date) => {
+    setFechaSeleccionada(fecha);
+    setVistaAgenda('diaria'); // Cambiar a vista diaria cuando se selecciona una fecha
   };
 
   return (
@@ -193,15 +222,54 @@ export default function AgendaPage() {
       {/* Contenido */}
       <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-6">
         {vista === 'agenda' ? (
-          <AgendaDiaria
-            fechaSeleccionada={fechaSeleccionada}
-            turnos={turnos}
-            pacientes={pacientes}
-            loading={loading}
-            onCambiarFecha={cambiarFecha}
-            onAbrirModalTurno={abrirModalTurno}
-            onAbrirModalPaciente={abrirModalPaciente}
-          />
+          <>
+            {/* Selector de vista agenda */}
+            <div className="mb-4 flex justify-end gap-2">
+              <button
+                onClick={() => setVistaAgenda('diaria')}
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition ${
+                  vistaAgenda === 'diaria'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <List className="w-4 h-4" />
+                <span className="hidden sm:inline">Vista Diaria</span>
+                <span className="sm:hidden">Diaria</span>
+              </button>
+              <button
+                onClick={() => setVistaAgenda('calendario')}
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition ${
+                  vistaAgenda === 'calendario'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <Grid3x3 className="w-4 h-4" />
+                <span className="hidden sm:inline">Vista Calendario</span>
+                <span className="sm:hidden">Calendario</span>
+              </button>
+            </div>
+            {vistaAgenda === 'diaria' ? (
+              <AgendaDiaria
+                fechaSeleccionada={fechaSeleccionada}
+                turnos={turnos}
+                pacientes={pacientes}
+                loading={loading}
+                onCambiarFecha={cambiarFecha}
+                onAbrirModalTurno={abrirModalTurno}
+                onAbrirModalPaciente={abrirModalPaciente}
+              />
+            ) : (
+              <VistaCalendario
+                turnos={turnosMes}
+                fechaSeleccionada={fechaSeleccionada}
+                onSeleccionarFecha={seleccionarFecha}
+                onAbrirModalTurno={abrirModalTurno}
+                loading={loading}
+              />
+            )}
+          </>
         ) : vista === 'pacientes' ? (
           <ListaPacientes
             pacientes={pacientes}
