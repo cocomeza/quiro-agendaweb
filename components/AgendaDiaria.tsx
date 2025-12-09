@@ -36,8 +36,11 @@ export default function AgendaDiaria({
   onAbrirModalTurno,
   onAbrirModalPaciente,
 }: AgendaDiariaProps) {
+  // Normalizar las horas a formato HH:MM para que coincidan con las franjas horarias
   const turnosPorHora = turnos.reduce((acc, turno) => {
-    acc[turno.hora] = turno;
+    // Normalizar hora: convertir "08:00:00" a "08:00" o mantener "08:00"
+    const horaNormalizada = turno.hora.length > 5 ? turno.hora.slice(0, 5) : turno.hora;
+    acc[horaNormalizada] = turno;
     return acc;
   }, {} as Record<string, TurnoConPaciente>);
 
@@ -156,6 +159,16 @@ export default function AgendaDiaria({
           <div className="flex flex-col items-center justify-center p-8">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mb-4"></div>
             <p className="text-gray-600 text-base">Cargando agenda...</p>
+          </div>
+        ) : turnos.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-8">
+            <p className="text-gray-600 text-base">No hay turnos programados para este día</p>
+            <button
+              onClick={() => onAbrirModalTurno()}
+              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-sm font-medium"
+            >
+              Crear primer turno
+            </button>
           </div>
         ) : (
           <div className="divide-y">
