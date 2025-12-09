@@ -51,10 +51,10 @@ export default function AgendaPage() {
     try {
       const fechaStr = format(fechaSeleccionada, 'yyyy-MM-dd');
 
-      // Cargar turnos del día
+      // Cargar turnos del día (incluyendo campo pago)
       const { data: turnosData, error: turnosError } = await supabase
         .from('turnos')
-        .select('*, pacientes(*)')
+        .select('id, paciente_id, fecha, hora, estado, pago, notas, created_at, updated_at, pacientes(*)')
         .eq('fecha', fechaStr)
         .order('hora', { ascending: true });
 

@@ -25,7 +25,7 @@ interface ModalTurnoProps {
 export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTurnoProps) {
   const [pacienteId, setPacienteId] = useState('');
   const [hora, setHora] = useState('');
-  const [estado, setEstado] = useState<'pendiente' | 'atendido' | 'cancelado' | 'programado' | 'completado'>('pendiente');
+  const [estado, setEstado] = useState<'programado' | 'completado' | 'cancelado'>('programado');
   const [pago, setPago] = useState<'pagado' | 'impago'>('impago');
   const [notas, setNotas] = useState('');
   const [loading, setLoading] = useState(false);
@@ -37,13 +37,13 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
     if (turno) {
       setPacienteId(turno.paciente_id);
       setHora(turno.hora);
-      setEstado(turno.estado);
+      setEstado(turno.estado as 'programado' | 'completado' | 'cancelado');
       setPago(turno.pago || 'impago');
       setNotas(turno.notas || '');
     } else {
       setPacienteId('');
       setHora('');
-      setEstado('pendiente');
+      setEstado('programado');
       setPago('impago');
       setNotas('');
     }
@@ -178,8 +178,8 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">
+        <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
             {turno ? 'Editar Turno' : 'Nuevo Turno'}
           </h2>
           <button
@@ -191,7 +191,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3 sm:space-y-4">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
               {error}
@@ -207,7 +207,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
               required
               value={pacienteId}
               onChange={(e) => setPacienteId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
               <option value="">Seleccionar paciente</option>
               {pacientes.map((paciente) => (
@@ -240,7 +240,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
               required
               value={hora}
               onChange={(e) => setHora(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
               <option value="">Seleccionar hora</option>
               {FRANJAS_HORARIAS.map((h) => (
@@ -259,8 +259,8 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
               id="estado"
               required
               value={estado}
-              onChange={(e) => setEstado(e.target.value as typeof estado)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              onChange={(e) => setEstado(e.target.value as 'programado' | 'completado' | 'cancelado')}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base"
             >
               <option value="programado">Programado</option>
               <option value="completado">Completado</option>
@@ -277,7 +277,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
               required
               value={pago}
               onChange={(e) => setPago(e.target.value as typeof pago)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
               <option value="impago">Impago</option>
               <option value="pagado">Pagado</option>
@@ -294,16 +294,16 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
               maxLength={1000}
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="Notas adicionales..."
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
             <button
               type="submit"
               disabled={loading || isSubmitting}
-              className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 text-sm sm:text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
               aria-label={loading ? 'Guardando turno...' : 'Guardar turno'}
             >
               {loading ? 'Guardando...' : 'Guardar'}
@@ -313,7 +313,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
                 type="button"
                 onClick={handleDelete}
                 disabled={loading}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-sm sm:text-base bg-red-600 text-white rounded-md hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
               >
                 Eliminar
               </button>
@@ -322,7 +322,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition disabled:opacity-50"
+              className="px-4 py-2 text-sm sm:text-base bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition disabled:opacity-50 touch-manipulation"
             >
               Cancelar
             </button>

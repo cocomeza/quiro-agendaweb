@@ -94,21 +94,21 @@ export default function VistaImpresionTurnos({ turnos, fecha }: VistaImpresionTu
                     </td>
                     <td className="py-3 px-4 text-base">
                       <span className={`font-medium ${
-                        turno.estado === 'atendido' ? 'text-green-700' :
-                        turno.estado === 'pendiente' ? 'text-blue-700' :
+                        turno.estado === 'completado' ? 'text-green-700' :
+                        turno.estado === 'programado' ? 'text-blue-700' :
                         'text-gray-700'
                       }`}>
-                        {turno.estado === 'atendido' ? 'Atendido' :
-                         turno.estado === 'pendiente' ? 'Pendiente' :
+                        {turno.estado === 'completado' ? 'Completado' :
+                         turno.estado === 'programado' ? 'Programado' :
                          turno.estado === 'cancelado' ? 'Cancelado' :
                          turno.estado}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-base">
                       <span className={`font-medium ${
-                        (turno as any).pago === 'pagado' ? 'text-green-700' : 'text-red-700'
+                        turno.pago === 'pagado' ? 'text-green-700' : 'text-red-700'
                       }`}>
-                        {(turno as any).pago === 'pagado' ? 'Pagado' : 'Impago'}
+                        {turno.pago === 'pagado' ? 'Pagado' : 'Impago'}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-gray-700 text-sm">

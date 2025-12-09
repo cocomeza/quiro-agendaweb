@@ -31,9 +31,9 @@ export interface Turno {
   paciente_id: string;
   fecha: string;
   hora: string;
-  estado: 'pendiente' | 'atendido' | 'cancelado';
+  estado: 'programado' | 'completado' | 'cancelado';
   notas: string | null;
-  payment_status?: 'pagado' | 'impago';
+  pago: 'pagado' | 'impago';
   created_at: string;
   updated_at: string;
 }
@@ -54,10 +54,8 @@ export type PacienteConFichaMedica = Paciente & {
   observaciones_medicas?: string | null;
 };
 
-// Tipo para turno con campo de pago
-export type TurnoConPago = Turno & {
-  pago?: 'pagado' | 'impago';
-};
+// Tipo para turno con campo de pago (compatibilidad)
+export type TurnoConPago = Turno;
 
 // Tipo Database para compatibilidad (opcional)
 export type Database = {

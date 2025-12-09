@@ -11,11 +11,11 @@ interface ResumenDiaProps {
 
 export default function ResumenDia({ turnos, fecha }: ResumenDiaProps) {
   const totalTurnos = turnos.length;
-  const completados = turnos.filter(t => t.estado === 'atendido').length;
-  const pendientes = turnos.filter(t => t.estado === 'pendiente').length;
+  const completados = turnos.filter(t => t.estado === 'completado').length;
+  const pendientes = turnos.filter(t => t.estado === 'programado').length;
   const cancelados = turnos.filter(t => t.estado === 'cancelado').length;
-  const pagados = turnos.filter(t => (t as any).payment_status === 'pagado').length;
-  const impagos = turnos.filter(t => (t as any).payment_status !== 'pagado').length;
+  const pagados = turnos.filter(t => t.pago === 'pagado').length;
+  const impagos = turnos.filter(t => t.pago !== 'pagado').length;
 
   const tarjetas = [
     {

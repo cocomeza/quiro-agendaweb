@@ -47,8 +47,10 @@ export default function AgendaDiaria({
         return 'bg-green-100 border-green-300 text-green-800';
       case 'cancelado':
         return 'bg-red-100 border-red-300 text-red-800';
-      default:
+      case 'programado':
         return 'bg-blue-100 border-blue-300 text-blue-800';
+      default:
+        return 'bg-gray-100 border-gray-300 text-gray-800';
     }
   };
 
@@ -149,7 +151,7 @@ export default function AgendaDiaria({
       </div>
 
       {/* Agenda */}
-      <div className="overflow-y-auto max-h-[calc(100vh-300px)]">
+      <div className="overflow-y-auto max-h-[calc(100vh-250px)] sm:max-h-[calc(100vh-300px)]">
         {loading ? (
           <div className="flex flex-col items-center justify-center p-8">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mb-4"></div>
@@ -162,40 +164,40 @@ export default function AgendaDiaria({
               return (
                 <div
                   key={hora}
-                  className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-gray-50 transition cursor-pointer"
+                  className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 hover:bg-gray-50 transition cursor-pointer"
                   onClick={() => turno ? onAbrirModalTurno(turno) : onAbrirModalTurno()}
                 >
-                  <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-                    <div className="w-16 sm:w-20 text-sm font-medium text-gray-700 flex-shrink-0 pt-1 sm:pt-0">
+                  <div className="flex items-start sm:items-center gap-2 sm:gap-3 lg:gap-4">
+                    <div className="w-14 sm:w-16 lg:w-20 text-xs sm:text-sm font-medium text-gray-700 flex-shrink-0 pt-1 sm:pt-0">
                       {hora}
                     </div>
                     {turno ? (
-                      <div className={`flex-1 px-3 sm:px-4 py-2 rounded-md border ${
+                      <div className={`flex-1 px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-md border ${
                         esTurnoAtrasado(turno.fecha, turno.hora, turno.estado)
                           ? 'border-red-500 bg-red-50'
                           : esTurnoProximo(turno.fecha, turno.hora)
                           ? 'border-yellow-400 bg-yellow-50'
                           : getEstadoColor(turno.estado)
                       }`}>
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2">
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <p className="font-medium truncate">
+                            <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                              <p className="text-sm sm:text-base font-medium truncate">
                                 {turno.pacientes.nombre} {turno.pacientes.apellido}
                               </p>
                               {esTurnoAtrasado(turno.fecha, turno.hora, turno.estado) && (
-                                <span className="text-xs px-2 py-0.5 bg-red-200 text-red-800 rounded flex items-center gap-1">
-                                  <AlertCircle className="w-3 h-3" />
-                                  Atrasado
+                                <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-red-200 text-red-800 rounded flex items-center gap-0.5 sm:gap-1">
+                                  <AlertCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                  <span className="hidden xs:inline">Atrasado</span>
                                 </span>
                               )}
                               {esTurnoProximo(turno.fecha, turno.hora) && !esTurnoAtrasado(turno.fecha, turno.hora, turno.estado) && (
-                                <span className="text-xs px-2 py-0.5 bg-yellow-200 text-yellow-800 rounded">
+                                <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-yellow-200 text-yellow-800 rounded">
                                   Próximo
                                 </span>
                               )}
                               {turno.pacientes.fecha_nacimiento && (
-                                <span className="text-xs px-2 py-0.5 bg-white bg-opacity-50 rounded">
+                                <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-white bg-opacity-50 rounded">
                                   {(() => {
                                     const hoy = new Date();
                                     const nacimiento = new Date(turno.pacientes.fecha_nacimiento);
@@ -204,35 +206,36 @@ export default function AgendaDiaria({
                                     if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
                                       edad--;
                                     }
-                                    return `${edad} años`;
+                                    return `${edad}a`;
                                   })()}
                                 </span>
                               )}
-                              {(turno as any).pago && (
-                                <span className={`text-xs px-2 py-0.5 rounded ${
-                                  (turno as any).pago === 'pagado' 
+                              {turno.pago && (
+                                <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded ${
+                                  turno.pago === 'pagado' 
                                     ? 'bg-green-200 text-green-800' 
                                     : 'bg-red-200 text-red-800'
                                 }`}>
-                                  {(turno as any).pago === 'pagado' ? 'Pagado' : 'Impago'}
+                                  {turno.pago === 'pagado' ? 'Pagado' : 'Impago'}
                                 </span>
                               )}
                             </div>
                             {turno.pacientes.telefono && (
-                              <div className="flex items-center gap-2 mt-1">
-                                <p className="text-xs opacity-75">
+                              <div className="flex items-center gap-1.5 sm:gap-2 mt-1">
+                                <p className="text-[10px] sm:text-xs opacity-75 truncate">
                                   {turno.pacientes.telefono}
                                 </p>
-                                <div className="flex gap-1">
+                                <div className="flex gap-0.5 sm:gap-1">
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       window.location.href = `tel:${turno.pacientes.telefono}`;
                                     }}
-                                    className="p-1 hover:bg-white hover:bg-opacity-50 rounded transition"
+                                    className="p-1 sm:p-1.5 hover:bg-white hover:bg-opacity-50 rounded transition touch-manipulation"
                                     title="Llamar"
+                                    aria-label="Llamar al paciente"
                                   >
-                                    <Phone className="w-3 h-3 text-blue-600" />
+                                    <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
                                   </button>
                                   <button
                                     onClick={async (e) => {
@@ -244,27 +247,31 @@ export default function AgendaDiaria({
                                         showError('❌ Error al copiar teléfono');
                                       }
                                     }}
-                                    className="p-1 hover:bg-white hover:bg-opacity-50 rounded transition"
+                                    className="p-1 sm:p-1.5 hover:bg-white hover:bg-opacity-50 rounded transition touch-manipulation"
                                     title="Copiar teléfono"
+                                    aria-label="Copiar teléfono al portapapeles"
                                   >
-                                    <Copy className="w-3 h-3 text-gray-600" />
+                                    <Copy className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" />
                                   </button>
                                 </div>
                               </div>
                             )}
                             {turno.notas && (
-                              <p className="text-xs mt-1 opacity-75 truncate">
+                              <p className="text-[10px] sm:text-xs mt-1 opacity-75 truncate">
                                 {turno.notas}
                               </p>
                             )}
                           </div>
-                          <span className="text-xs font-medium px-2 py-1 bg-white bg-opacity-50 rounded self-start sm:self-auto">
-                            {turno.estado}
+                          <span className="text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 bg-white bg-opacity-50 rounded self-start sm:self-auto">
+                            {turno.estado === 'completado' ? 'Completado' :
+                             turno.estado === 'programado' ? 'Programado' :
+                             turno.estado === 'cancelado' ? 'Cancelado' :
+                             turno.estado}
                           </span>
                         </div>
                       </div>
                     ) : (
-                      <div className="flex-1 text-sm text-gray-400 italic">
+                      <div className="flex-1 text-xs sm:text-sm text-gray-400 italic">
                         Disponible
                       </div>
                     )}
