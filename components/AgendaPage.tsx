@@ -51,10 +51,10 @@ export default function AgendaPage() {
     try {
       const fechaStr = format(fechaSeleccionada, 'yyyy-MM-dd');
 
-      // Cargar turnos del día (incluyendo campo pago)
+      // Cargar turnos del día (incluyendo campo pago y relación con pacientes)
       const { data: turnosData, error: turnosError } = await supabase
         .from('turnos')
-        .select('id, paciente_id, fecha, hora, estado, pago, notas, created_at, updated_at, pacientes(*)')
+        .select('*, pacientes(*)')
         .eq('fecha', fechaStr)
         .order('hora', { ascending: true });
 
@@ -69,7 +69,13 @@ export default function AgendaPage() {
 
       if (pacientesError) throw pacientesError;
 
-      setTurnos((turnosData as TurnoConPaciente[]) || []);
+      // Mapear los datos correctamente: Supabase devuelve pacientes como objeto en la relación
+      const turnosMapeados: TurnoConPaciente[] = (turnosData || []).map((turno: any) => ({
+        ...turno,
+        pacientes: Array.isArray(turno.pacientes) ? turno.pacientes[0] : turno.pacientes,
+      }));
+
+      setTurnos(turnosMapeados);
       setPacientes((pacientesData as Paciente[]) || []);
       // Logger removido para producción
     } catch (error: unknown) {
