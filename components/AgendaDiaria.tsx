@@ -68,13 +68,13 @@ export default function AgendaDiaria({
   const getEstadoColor = (estado: string) => {
     switch (estado) {
       case 'completado':
-        return 'bg-green-100 border-green-300 text-green-800';
+        return 'bg-green-50 border-green-500 text-green-900';
       case 'cancelado':
-        return 'bg-red-100 border-red-300 text-red-800';
+        return 'bg-red-50 border-red-500 text-red-900';
       case 'programado':
-        return 'bg-blue-100 border-blue-300 text-blue-800';
+        return 'bg-blue-50 border-blue-500 text-blue-900';
       default:
-        return 'bg-gray-100 border-gray-300 text-gray-800';
+        return 'bg-gray-50 border-gray-400 text-gray-900';
     }
   };
 
@@ -156,7 +156,7 @@ export default function AgendaDiaria({
         <div className="flex gap-2">
           <button
             onClick={handleImprimir}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition text-sm font-medium"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition text-sm font-semibold shadow-sm"
             title="Imprimir agenda"
             aria-label="Imprimir agenda del día"
           >
@@ -165,7 +165,7 @@ export default function AgendaDiaria({
           </button>
           <button
             onClick={() => onAbrirModalTurno()}
-            className="flex items-center justify-center gap-2 flex-1 sm:flex-initial px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-sm font-medium"
+            className="flex items-center justify-center gap-2 flex-1 sm:flex-initial px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold shadow-md"
             aria-label="Crear nuevo turno"
           >
             <Plus className="w-4 h-4" />
@@ -183,7 +183,7 @@ export default function AgendaDiaria({
           </div>
         ) : turnos.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8">
-            <p className="text-gray-600 text-base">No hay turnos programados para este día</p>
+            <p className="text-gray-700 text-base font-medium">No hay turnos programados para este día</p>
             <button
               onClick={() => onAbrirModalTurno()}
               className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-sm font-medium"
@@ -216,17 +216,17 @@ export default function AgendaDiaria({
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                              <p className="text-sm sm:text-base font-medium truncate">
+                              <p className="text-sm sm:text-base font-bold text-gray-900 truncate">
                                 {turno.pacientes.nombre} {turno.pacientes.apellido}
                               </p>
                               {esTurnoAtrasado(turno.fecha, turno.hora, turno.estado) && (
-                                <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-red-200 text-red-800 rounded flex items-center gap-0.5 sm:gap-1">
-                                  <AlertCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                                <span className="text-xs sm:text-sm px-2 sm:px-2.5 py-1 bg-red-600 text-white rounded-md flex items-center gap-1 font-semibold shadow-sm">
+                                  <AlertCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                   <span className="hidden xs:inline">Atrasado</span>
                                 </span>
                               )}
                               {esTurnoProximo(turno.fecha, turno.hora) && !esTurnoAtrasado(turno.fecha, turno.hora, turno.estado) && (
-                                <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-yellow-200 text-yellow-800 rounded">
+                                <span className="text-xs sm:text-sm px-2 sm:px-2.5 py-1 bg-yellow-500 text-yellow-900 rounded-md font-semibold shadow-sm">
                                   Próximo
                                 </span>
                               )}
@@ -245,10 +245,10 @@ export default function AgendaDiaria({
                                 </span>
                               )}
                               {turno.pago && (
-                                <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded ${
+                                <span className={`text-xs sm:text-sm px-2 sm:px-2.5 py-1 rounded-md font-semibold shadow-sm ${
                                   turno.pago === 'pagado' 
-                                    ? 'bg-green-200 text-green-800' 
-                                    : 'bg-red-200 text-red-800'
+                                    ? 'bg-green-600 text-white' 
+                                    : 'bg-red-600 text-white'
                                 }`}>
                                   {turno.pago === 'pagado' ? 'Pagado' : 'Impago'}
                                 </span>
@@ -256,7 +256,7 @@ export default function AgendaDiaria({
                             </div>
                             {turno.pacientes.telefono && (
                               <div className="flex items-center gap-1.5 sm:gap-2 mt-1">
-                                <p className="text-[10px] sm:text-xs opacity-75 truncate">
+                                <p className="text-xs sm:text-sm text-gray-700 font-medium truncate">
                                   {turno.pacientes.telefono}
                                 </p>
                                 <div className="flex gap-0.5 sm:gap-1">
@@ -291,12 +291,12 @@ export default function AgendaDiaria({
                               </div>
                             )}
                             {turno.notas && (
-                              <p className="text-[10px] sm:text-xs mt-1 opacity-75 truncate">
+                              <p className="text-xs sm:text-sm mt-1 text-gray-700 truncate">
                                 {turno.notas}
                               </p>
                             )}
                           </div>
-                          <span className="text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 bg-white bg-opacity-50 rounded self-start sm:self-auto">
+                          <span className="text-xs sm:text-sm font-bold px-2 sm:px-3 py-1 bg-white rounded-md self-start sm:self-auto shadow-sm border border-gray-200">
                             {turno.estado === 'completado' ? 'Completado' :
                              turno.estado === 'programado' ? 'Programado' :
                              turno.estado === 'cancelado' ? 'Cancelado' :
@@ -305,7 +305,7 @@ export default function AgendaDiaria({
                         </div>
                       </div>
                     ) : (
-                      <div className="flex-1 text-xs sm:text-sm text-gray-400 italic">
+                      <div className="flex-1 text-sm sm:text-base text-gray-500 font-medium">
                         Disponible
                       </div>
                     )}

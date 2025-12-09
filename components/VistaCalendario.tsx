@@ -92,7 +92,7 @@ export default function VistaCalendario({
             </button>
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <Calendar className="w-5 h-5 text-gray-500 flex-shrink-0" />
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
                 {format(mesActual, 'MMMM yyyy', { locale: es })}
               </h2>
             </div>
@@ -106,7 +106,7 @@ export default function VistaCalendario({
           </div>
           <button
             onClick={irAHoy}
-            className="ml-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition flex-shrink-0"
+            className="ml-2 px-3 sm:px-4 py-2 text-sm sm:text-base font-semibold text-gray-800 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition flex-shrink-0 shadow-sm"
           >
             Hoy
           </button>
@@ -118,7 +118,7 @@ export default function VistaCalendario({
         {loading ? (
           <div className="flex flex-col items-center justify-center p-8">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mb-4"></div>
-            <p className="text-gray-600 text-base">Cargando calendario...</p>
+            <p className="text-gray-700 text-base font-medium">Cargando calendario...</p>
           </div>
         ) : (
           <>
@@ -127,7 +127,7 @@ export default function VistaCalendario({
               {diasSemana.map((dia) => (
                 <div
                   key={dia}
-                  className="text-center text-xs sm:text-sm font-medium text-gray-700 py-2"
+                  className="text-center text-sm sm:text-base font-bold text-gray-900 py-2"
                 >
                   {dia}
                 </div>
@@ -175,11 +175,11 @@ export default function VistaCalendario({
                   >
                     <div className="flex flex-col h-full">
                       <div
-                        className={`text-xs sm:text-sm font-medium ${
+                        className={`text-sm sm:text-base font-bold ${
                           esSeleccionado
-                            ? 'text-indigo-700'
+                            ? 'text-white'
                             : esHoy
-                            ? 'text-blue-700'
+                            ? 'text-blue-900'
                             : 'text-gray-900'
                         }`}
                       >
@@ -202,7 +202,7 @@ export default function VistaCalendario({
                                     e.stopPropagation();
                                     onAbrirModalTurno(turno);
                                   }}
-                                  className={`${colorEstado} text-white text-[8px] sm:text-[10px] px-1 py-0.5 mb-0.5 rounded truncate cursor-pointer hover:opacity-80`}
+                                  className={`${colorEstado} text-white text-[10px] sm:text-xs px-1.5 py-1 mb-0.5 rounded-md truncate cursor-pointer hover:opacity-90 font-semibold shadow-sm`}
                                   title={`${turno.pacientes.nombre} ${turno.pacientes.apellido} - ${turno.hora}`}
                                 >
                                   {turno.hora} {turno.pacientes.nombre.split(' ')[0]}
@@ -210,7 +210,7 @@ export default function VistaCalendario({
                               );
                             })}
                             {cantidadTurnos > 3 && (
-                              <div className="text-[8px] sm:text-[10px] text-gray-600 font-medium mt-0.5">
+                              <div className="text-xs text-gray-700 font-bold mt-0.5">
                                 +{cantidadTurnos - 3} más
                               </div>
                             )}

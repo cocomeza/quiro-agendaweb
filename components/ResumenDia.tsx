@@ -50,7 +50,7 @@ export default function ResumenDia({ turnos, fecha }: ResumenDiaProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6 mb-4 sm:mb-6">
-      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
+      <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
         Resumen del Día
       </h3>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
@@ -62,8 +62,8 @@ export default function ResumenDia({ turnos, fecha }: ResumenDiaProps) {
               className={`${tarjeta.color} border-2 rounded-lg p-3 sm:p-4 flex flex-col items-center text-center`}
             >
               <Icon className={`w-6 h-6 sm:w-8 sm:h-8 ${tarjeta.iconColor} mb-2`} />
-              <div className="text-2xl sm:text-3xl font-bold">{tarjeta.valor}</div>
-              <div className="text-xs sm:text-sm font-medium mt-1">{tarjeta.titulo}</div>
+              <div className="text-3xl sm:text-4xl font-bold">{tarjeta.valor}</div>
+              <div className="text-sm sm:text-base font-semibold mt-1">{tarjeta.titulo}</div>
             </div>
           );
         })}
@@ -71,12 +71,12 @@ export default function ResumenDia({ turnos, fecha }: ResumenDiaProps) {
       {totalTurnos > 0 && (
         <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-2 gap-3 sm:gap-4">
           <div className="text-center">
-            <div className="text-lg sm:text-xl font-semibold text-green-700">{pagados}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Pagados</div>
+            <div className="text-xl sm:text-2xl font-bold text-green-700">{pagados}</div>
+            <div className="text-sm sm:text-base font-semibold text-gray-700">Pagados</div>
           </div>
           <div className="text-center">
-            <div className="text-lg sm:text-xl font-semibold text-red-700">{impagos}</div>
-            <div className="text-xs sm:text-sm text-gray-600">Impagos</div>
+            <div className="text-xl sm:text-2xl font-bold text-red-700">{impagos}</div>
+            <div className="text-sm sm:text-base font-semibold text-gray-700">Impagos</div>
           </div>
         </div>
       )}

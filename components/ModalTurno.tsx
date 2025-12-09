@@ -199,7 +199,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
           )}
 
           <div>
-            <label htmlFor="paciente" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="paciente" className="block text-sm font-semibold text-gray-900 mb-2">
               Paciente *
             </label>
             <select
@@ -207,7 +207,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
               required
               value={pacienteId}
               onChange={(e) => setPacienteId(e.target.value)}
-              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-4 py-2.5 text-sm sm:text-base border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 font-medium"
             >
               <option value="">Seleccionar paciente</option>
               {pacientes.map((paciente) => (
@@ -240,7 +240,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
               required
               value={hora}
               onChange={(e) => setHora(e.target.value)}
-              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-4 py-2.5 text-sm sm:text-base border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 font-medium"
             >
               <option value="">Seleccionar hora</option>
               {FRANJAS_HORARIAS.map((h) => (
@@ -277,7 +277,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
               required
               value={pago}
               onChange={(e) => setPago(e.target.value as typeof pago)}
-              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-4 py-2.5 text-sm sm:text-base border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 font-medium"
             >
               <option value="impago">Impago</option>
               <option value="pagado">Pagado</option>
@@ -294,7 +294,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
               maxLength={1000}
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
-              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-4 py-2.5 text-sm sm:text-base border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 font-medium"
               placeholder="Notas adicionales..."
             />
           </div>
@@ -303,7 +303,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
             <button
               type="submit"
               disabled={loading || isSubmitting}
-              className="flex-1 px-4 py-2 text-sm sm:text-base bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+              className="flex-1 px-4 py-2.5 text-sm sm:text-base bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation font-semibold shadow-md"
               aria-label={loading ? 'Guardando turno...' : 'Guardar turno'}
             >
               {loading ? 'Guardando...' : 'Guardar'}
@@ -313,7 +313,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
                 type="button"
                 onClick={handleDelete}
                 disabled={loading}
-                className="px-4 py-2 text-sm sm:text-base bg-red-600 text-white rounded-md hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                className="px-4 py-2.5 text-sm sm:text-base bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation font-semibold shadow-md"
               >
                 Eliminar
               </button>
@@ -322,7 +322,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 text-sm sm:text-base bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition disabled:opacity-50 touch-manipulation"
+              className="px-4 py-2.5 text-sm sm:text-base bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition disabled:opacity-50 touch-manipulation font-semibold shadow-sm"
             >
               Cancelar
             </button>
