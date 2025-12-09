@@ -39,10 +39,31 @@ export default function AgendaDiaria({
   // Normalizar las horas a formato HH:MM para que coincidan con las franjas horarias
   const turnosPorHora = turnos.reduce((acc, turno) => {
     // Normalizar hora: convertir "08:00:00" a "08:00" o mantener "08:00"
-    const horaNormalizada = turno.hora.length > 5 ? turno.hora.slice(0, 5) : turno.hora;
+    // También manejar casos como "8:00" -> "08:00"
+    let horaNormalizada = turno.hora.trim();
+    
+    // Si tiene segundos, removerlos
+    if (horaNormalizada.length > 5) {
+      horaNormalizada = horaNormalizada.slice(0, 5);
+    }
+    
+    // Asegurar formato HH:MM (agregar cero inicial si es necesario)
+    const partes = horaNormalizada.split(':');
+    if (partes.length === 2) {
+      const horas = partes[0].padStart(2, '0');
+      const minutos = partes[1].padStart(2, '0');
+      horaNormalizada = `${horas}:${minutos}`;
+    }
+    
     acc[horaNormalizada] = turno;
     return acc;
   }, {} as Record<string, TurnoConPaciente>);
+  
+  // Debug: mostrar turnos cargados (solo en desarrollo)
+  if (process.env.NODE_ENV === 'development' && turnos.length > 0) {
+    console.log('Turnos cargados:', turnos.map(t => ({ hora: t.hora, paciente: `${t.pacientes.nombre} ${t.pacientes.apellido}` })));
+    console.log('Turnos por hora mapeados:', Object.keys(turnosPorHora));
+  }
 
   const getEstadoColor = (estado: string) => {
     switch (estado) {
