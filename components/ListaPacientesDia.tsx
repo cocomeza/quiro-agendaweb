@@ -25,20 +25,23 @@ export default function ListaPacientesDia({ turnos, fecha }: ListaPacientesDiaPr
 
   return (
     <div className="bg-white rounded-lg shadow">
-      {/* Encabezado - oculto al imprimir */}
-      <div className="px-4 sm:px-6 py-4 border-b no-print">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg sm:text-xl font-bold text-gray-900">
+      {/* Encabezado único - se adapta a pantalla e impresión */}
+      <div className="px-4 sm:px-6 print:p-8 py-4 print:py-6 border-b print:border-b-2 print:border-gray-300">
+        <div className="flex items-center justify-between print:flex-col print:text-center print:items-center">
+          <div className="print:w-full">
+            <h3 className="text-lg sm:text-xl print:text-3xl font-bold text-gray-900 print:mb-2">
               Lista de Pacientes con Turno
             </h3>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm print:text-xl print:font-semibold text-gray-600 print:text-gray-700 mt-1 print:mt-0">
               {format(fecha, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
+            </p>
+            <p className="hidden print:block text-sm text-gray-600 mt-2">
+              Total de pacientes: {turnosOrdenados.length}
             </p>
           </div>
           <button
             onClick={handleImprimir}
-            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold shadow-md"
+            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold shadow-md no-print"
             title="Imprimir lista de pacientes"
             aria-label="Imprimir lista de pacientes del día"
           >
@@ -46,21 +49,6 @@ export default function ListaPacientesDia({ turnos, fecha }: ListaPacientesDiaPr
             <span className="hidden sm:inline">Imprimir Lista</span>
             <span className="sm:hidden">Imprimir</span>
           </button>
-        </div>
-      </div>
-
-      {/* Encabezado para impresión - solo visible al imprimir */}
-      <div className="hidden print:block p-8 pb-4">
-        <div className="text-center mb-6 border-b-2 border-gray-300 pb-4">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Lista de Pacientes con Turno
-          </h1>
-          <p className="text-xl text-gray-700 font-semibold">
-            {format(fecha, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
-          </p>
-          <p className="text-sm text-gray-600 mt-2">
-            Total de pacientes: {turnosOrdenados.length}
-          </p>
         </div>
       </div>
 
