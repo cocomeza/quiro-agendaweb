@@ -433,7 +433,85 @@ async function migratePatients() {
     process.exit(0);
   }
 
-  // 4. Insertar en lotes de 100
+  // 3.5. Verificar si los pacientes ya existen en la BD
+  console.log('🔍 Verificando pacientes existentes en la base de datos...\n');
+  const { data: pacientesExistentes, error: errorExistentes } = await supabase
+    .from('pacientes')
+    .select('id, nombre, apellido, telefono, numero_ficha');
+
+  if (errorExistentes) {
+    console.warn('⚠️  No se pudieron verificar pacientes existentes:', errorExistentes.message);
+  }
+
+  // Crear un mapa de pacientes existentes para búsqueda rápida
+  const mapaExistentes = new Map<string, any>();
+  if (pacientesExistentes) {
+    pacientesExistentes.forEach(p => {
+      const nombreKey = `${p.nombre.toLowerCase().trim()}_${p.apellido.toLowerCase().trim()}`;
+      const phoneKey = p.telefono ? p.telefono.replace(/\D/g, '') : 'sin-telefono';
+      const key = `${nombreKey}_${phoneKey}`;
+      mapaExistentes.set(key, p);
+    });
+  }
+
+  // Separar en nuevos y actualizaciones
+  const pacientesNuevos: SupabasePatient[] = [];
+  const pacientesActualizar: Array<{ id: string; datos: SupabasePatient }> = [];
+
+  uniquePatients.forEach(paciente => {
+    const nombreKey = `${paciente.nombre.toLowerCase().trim()}_${paciente.apellido.toLowerCase().trim()}`;
+    const phoneKey = paciente.telefono ? paciente.telefono.replace(/\D/g, '') : 'sin-telefono';
+    const key = `${nombreKey}_${phoneKey}`;
+    
+    const existente = mapaExistentes.get(key);
+    
+    if (existente) {
+      // Si existe y no tiene numero_ficha o tiene "0" o está vacío, pero el CSV sí tiene, actualizar
+      const tieneFichaValida = existente.numero_ficha && existente.numero_ficha.trim() !== '' && existente.numero_ficha !== '0';
+      const csvTieneFichaValida = paciente.numero_ficha && paciente.numero_ficha.trim() !== '' && paciente.numero_ficha !== '0';
+      
+      if (!tieneFichaValida && csvTieneFichaValida) {
+        pacientesActualizar.push({ id: existente.id, datos: paciente });
+      } else if (tieneFichaValida && csvTieneFichaValida && existente.numero_ficha !== paciente.numero_ficha) {
+        // Si ambos tienen ficha pero son diferentes, también actualizar (el CSV es la fuente de verdad)
+        pacientesActualizar.push({ id: existente.id, datos: paciente });
+      }
+    } else {
+      // Es un paciente nuevo
+      pacientesNuevos.push(paciente);
+    }
+  });
+
+  console.log(`📊 Análisis de pacientes:`);
+  console.log(`   ✅ Nuevos: ${pacientesNuevos.length}`);
+  console.log(`   🔄 A actualizar (agregar numero_ficha): ${pacientesActualizar.length}`);
+  console.log(`   ⏭️  Ya existen (sin cambios): ${uniquePatients.length - pacientesNuevos.length - pacientesActualizar.length}\n`);
+
+  // 4. Actualizar pacientes existentes que no tienen numero_ficha
+  if (pacientesActualizar.length > 0) {
+    console.log(`🔄 Actualizando ${pacientesActualizar.length} pacientes existentes con número de ficha...\n`);
+    
+    for (const { id, datos } of pacientesActualizar) {
+      const { error: updateError } = await supabase
+        .from('pacientes')
+        .update({ numero_ficha: datos.numero_ficha })
+        .eq('id', id);
+
+      if (updateError) {
+        console.warn(`⚠️  Error al actualizar paciente ${id}: ${updateError.message}`);
+      }
+    }
+    
+    console.log(`✅ Actualización completada\n`);
+  }
+
+  if (pacientesNuevos.length === 0) {
+    console.log('✅ No hay pacientes nuevos para insertar.\n');
+    console.log('💡 Todos los pacientes del CSV ya existen en la base de datos.\n');
+    process.exit(0);
+  }
+
+  // 5. Insertar solo pacientes nuevos en lotes de 100
   const batchSize = 100;
   let successCount = 0;
   let errorCount = 0;
@@ -442,7 +520,7 @@ async function migratePatients() {
   for (let i = 0; i < uniquePatients.length; i += batchSize) {
     const batch = uniquePatients.slice(i, i + batchSize);
     const batchNumber = Math.floor(i / batchSize) + 1;
-    const totalBatches = Math.ceil(uniquePatients.length / batchSize);
+    const totalBatches = Math.ceil(pacientesNuevos.length / batchSize);
 
     console.log(`📦 Procesando lote ${batchNumber}/${totalBatches} (${batch.length} registros)...`);
 
@@ -467,7 +545,7 @@ async function migratePatients() {
     }
 
     // Pequeña pausa entre lotes
-    if (i + batchSize < uniquePatients.length) {
+    if (i + batchSize < pacientesNuevos.length) {
       await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
@@ -487,9 +565,12 @@ async function migratePatients() {
   console.log('\n' + '='.repeat(60));
   console.log('📊 RESUMEN DE MIGRACIÓN');
   console.log('='.repeat(60));
-  console.log(`✅ Exitosos: ${successCount}`);
+  console.log(`✅ Nuevos pacientes insertados: ${successCount}`);
+  console.log(`🔄 Pacientes actualizados: ${pacientesActualizar.length}`);
   console.log(`❌ Errores: ${errorCount}`);
-  console.log(`📈 Tasa de éxito: ${((successCount / uniquePatients.length) * 100).toFixed(2)}%`);
+  if (pacientesNuevos.length > 0) {
+    console.log(`📈 Tasa de éxito: ${((successCount / pacientesNuevos.length) * 100).toFixed(2)}%`);
+  }
   console.log('='.repeat(60) + '\n');
 }
 
