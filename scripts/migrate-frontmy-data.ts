@@ -466,15 +466,16 @@ async function migratePatients() {
     const existente = mapaExistentes.get(key);
     
     if (existente) {
-      // Si existe y no tiene numero_ficha o tiene "0" o está vacío, pero el CSV sí tiene, actualizar
-      const tieneFichaValida = existente.numero_ficha && existente.numero_ficha.trim() !== '' && existente.numero_ficha !== '0';
-      const csvTieneFichaValida = paciente.numero_ficha && paciente.numero_ficha.trim() !== '' && paciente.numero_ficha !== '0';
-      
-      if (!tieneFichaValida && csvTieneFichaValida) {
-        pacientesActualizar.push({ id: existente.id, datos: paciente });
-      } else if (tieneFichaValida && csvTieneFichaValida && existente.numero_ficha !== paciente.numero_ficha) {
-        // Si ambos tienen ficha pero son diferentes, también actualizar (el CSV es la fuente de verdad)
-        pacientesActualizar.push({ id: existente.id, datos: paciente });
+      // El CSV es la fuente de verdad: SIEMPRE actualizar numero_ficha desde el CSV
+      // Actualizar todos los pacientes con el numero_ficha del CSV (incluso si es "0")
+      if (paciente.numero_ficha !== null && paciente.numero_ficha !== undefined) {
+        const fichaActual = (existente.numero_ficha || '').trim();
+        const fichaCSV = (paciente.numero_ficha || '').trim();
+        
+        // Actualizar si es diferente (el CSV siempre tiene prioridad)
+        if (fichaActual !== fichaCSV) {
+          pacientesActualizar.push({ id: existente.id, datos: paciente });
+        }
       }
     } else {
       // Es un paciente nuevo
@@ -487,9 +488,12 @@ async function migratePatients() {
   console.log(`   🔄 A actualizar (agregar numero_ficha): ${pacientesActualizar.length}`);
   console.log(`   ⏭️  Ya existen (sin cambios): ${uniquePatients.length - pacientesNuevos.length - pacientesActualizar.length}\n`);
 
-  // 4. Actualizar pacientes existentes que no tienen numero_ficha
+  // 4. Actualizar pacientes existentes con numero_ficha desde el CSV (el CSV es la fuente de verdad)
   if (pacientesActualizar.length > 0) {
-    console.log(`🔄 Actualizando ${pacientesActualizar.length} pacientes existentes con número de ficha...\n`);
+    console.log(`🔄 Actualizando ${pacientesActualizar.length} pacientes existentes con número de ficha desde CSV...\n`);
+    
+    let actualizados = 0;
+    let errores = 0;
     
     for (const { id, datos } of pacientesActualizar) {
       const { error: updateError } = await supabase
@@ -499,10 +503,13 @@ async function migratePatients() {
 
       if (updateError) {
         console.warn(`⚠️  Error al actualizar paciente ${id}: ${updateError.message}`);
+        errores++;
+      } else {
+        actualizados++;
       }
     }
     
-    console.log(`✅ Actualización completada\n`);
+    console.log(`✅ Actualización completada: ${actualizados} actualizados, ${errores} errores\n`);
   }
 
   if (pacientesNuevos.length === 0) {
