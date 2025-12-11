@@ -24,9 +24,10 @@ interface PacienteSeguimiento {
 }
 
 type FiltroSeguimiento = 
-  | 'proximos_volver' 
-  | 'cancelaciones_recientes' 
-  | 'sin_llamar'
+  | 'recordar_visita'           // Pacientes que deberían volver (18-28 días desde última visita)
+  | 'no_vienen_hace_tiempo'     // Pacientes que no vienen hace más de 30 días
+  | 'cancelaron_recientemente'  // Pacientes que cancelaron turnos recientemente
+  | 'sin_turno_programado'      // Pacientes activos sin turno programado
   | null;
 
 export default function SeguimientoPacientes() {
@@ -34,6 +35,7 @@ export default function SeguimientoPacientes() {
   const [filtroActivo, setFiltroActivo] = useState<FiltroSeguimiento>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pacientesConTurno, setPacientesConTurno] = useState<Set<string>>(new Set());
   const supabase = createClient();
 
   useEffect(() => {
@@ -116,20 +118,44 @@ export default function SeguimientoPacientes() {
         };
       });
 
+      // Cargar turnos programados para saber quién tiene turno
+      const { data: turnosProgramados } = await supabase
+        .from('turnos')
+        .select('paciente_id')
+        .eq('estado', 'programado')
+        .gte('fecha', format(new Date(), 'yyyy-MM-dd'));
+
+      const pacientesConTurnoSet = new Set(turnosProgramados?.map(t => t.paciente_id) || []);
+      setPacientesConTurno(pacientesConTurnoSet);
+      
+      // Guardar en variable local para usar en filtros
+      const pacientesConTurno = pacientesConTurnoSet;
+
       // Aplicar filtros
-      if (filtroActivo === 'proximos_volver') {
-        // Pacientes con última visita entre 18 y 28 días
+      if (filtroActivo === 'recordar_visita') {
+        // Pacientes que deberían volver (última visita hace 18-28 días)
         pacientesFiltrados = pacientesFiltrados.filter(p => {
           if (!p.ultima_visita) return false;
           const diasDesdeUltimaVisita = differenceInDays(new Date(), new Date(p.ultima_visita));
           return diasDesdeUltimaVisita >= 18 && diasDesdeUltimaVisita <= 28;
         });
-      } else if (filtroActivo === 'cancelaciones_recientes') {
-        // Pacientes con turnos cancelados en los últimos 20 días
+      } else if (filtroActivo === 'no_vienen_hace_tiempo') {
+        // Pacientes que no vienen hace más de 30 días
+        pacientesFiltrados = pacientesFiltrados.filter(p => {
+          if (!p.ultima_visita) return false;
+          const diasDesdeUltimaVisita = differenceInDays(new Date(), new Date(p.ultima_visita));
+          return diasDesdeUltimaVisita > 30;
+        });
+      } else if (filtroActivo === 'cancelaron_recientemente') {
+        // Pacientes que cancelaron turnos en los últimos 20 días
         pacientesFiltrados = pacientesFiltrados.filter(p => p.turnos_cancelados_recientes > 0);
-      } else if (filtroActivo === 'sin_llamar') {
-        // Pacientes sin llamadas telefónicas
-        pacientesFiltrados = pacientesFiltrados.filter(p => !p.llamado_telefono && p.telefono);
+      } else if (filtroActivo === 'sin_turno_programado') {
+        // Pacientes activos (con última visita en últimos 60 días) pero sin turno programado
+        pacientesFiltrados = pacientesFiltrados.filter(p => {
+          if (!p.ultima_visita) return false;
+          const diasDesdeUltimaVisita = differenceInDays(new Date(), new Date(p.ultima_visita));
+          return diasDesdeUltimaVisita <= 60 && !pacientesConTurnoSet.has(p.id);
+        });
       }
 
       setPacientes(pacientesFiltrados);
@@ -224,48 +250,79 @@ export default function SeguimientoPacientes() {
         </div>
       )}
       {/* Header */}
-      <div className="border-b px-4 sm:px-6 py-4">
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Seguimiento de Pacientes</h2>
+      <div className="border-b px-4 sm:px-6 py-4 bg-gradient-to-r from-indigo-50 to-blue-50">
+        <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">📞 Seguimiento de Pacientes</h2>
+        <p className="text-sm text-gray-700">
+          Encuentra pacientes que necesitan atención: recordatorios de visitas, seguimiento de cancelaciones y pacientes sin turno programado.
+        </p>
       </div>
 
       {/* Filtros */}
-      <div className="border-b px-4 sm:px-6 py-4 space-y-3">
-        <div className="flex flex-wrap gap-2">
+      <div className="border-b px-4 sm:px-6 py-4 space-y-3 bg-white">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <button
-            onClick={() => setFiltroActivo(filtroActivo === 'proximos_volver' ? null : 'proximos_volver')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition ${
-              filtroActivo === 'proximos_volver'
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            onClick={() => setFiltroActivo(filtroActivo === 'recordar_visita' ? null : 'recordar_visita')}
+            className={`px-4 py-3 rounded-lg text-sm font-semibold transition-all shadow-sm ${
+              filtroActivo === 'recordar_visita'
+                ? 'bg-green-600 text-white shadow-md'
+                : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
             }`}
           >
-            Próximos a volver (18-28 días)
+            <div className="text-base mb-1">🔄 Recordar Visita</div>
+            <div className="text-xs opacity-90">Última visita hace 18-28 días</div>
           </button>
+          
           <button
-            onClick={() => setFiltroActivo(filtroActivo === 'cancelaciones_recientes' ? null : 'cancelaciones_recientes')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition ${
-              filtroActivo === 'cancelaciones_recientes'
-                ? 'bg-red-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            onClick={() => setFiltroActivo(filtroActivo === 'no_vienen_hace_tiempo' ? null : 'no_vienen_hace_tiempo')}
+            className={`px-4 py-3 rounded-lg text-sm font-semibold transition-all shadow-sm ${
+              filtroActivo === 'no_vienen_hace_tiempo'
+                ? 'bg-orange-600 text-white shadow-md'
+                : 'bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200'
             }`}
           >
-            Cancelaciones recientes
+            <div className="text-base mb-1">⏰ No Vienen Hace Tiempo</div>
+            <div className="text-xs opacity-90">Más de 30 días sin venir</div>
           </button>
+          
           <button
-            onClick={() => setFiltroActivo(filtroActivo === 'sin_llamar' ? null : 'sin_llamar')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition ${
-              filtroActivo === 'sin_llamar'
-                ? 'bg-yellow-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            onClick={() => setFiltroActivo(filtroActivo === 'cancelaron_recientemente' ? null : 'cancelaron_recientemente')}
+            className={`px-4 py-3 rounded-lg text-sm font-semibold transition-all shadow-sm ${
+              filtroActivo === 'cancelaron_recientemente'
+                ? 'bg-red-600 text-white shadow-md'
+                : 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200'
             }`}
           >
-            Sin llamar
+            <div className="text-base mb-1">❌ Cancelaron Recientemente</div>
+            <div className="text-xs opacity-90">Cancelaron en últimos 20 días</div>
+          </button>
+          
+          <button
+            onClick={() => setFiltroActivo(filtroActivo === 'sin_turno_programado' ? null : 'sin_turno_programado')}
+            className={`px-4 py-3 rounded-lg text-sm font-semibold transition-all shadow-sm ${
+              filtroActivo === 'sin_turno_programado'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
+            }`}
+          >
+            <div className="text-base mb-1">📅 Sin Turno Programado</div>
+            <div className="text-xs opacity-90">Activos pero sin próximo turno</div>
           </button>
         </div>
+        
         {filtroActivo && (
-          <p className="text-sm text-gray-600">
-            Mostrando {pacientes.length} paciente{pacientes.length !== 1 ? 's' : ''}
-          </p>
+          <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-gray-700">
+                📋 Mostrando <span className="font-bold text-indigo-600">{pacientes.length}</span> paciente{pacientes.length !== 1 ? 's' : ''}
+              </p>
+              <p className="text-xs text-gray-600 italic">
+                {filtroActivo === 'recordar_visita' && '💡 Llama para recordarles que vuelvan'}
+                {filtroActivo === 'no_vienen_hace_tiempo' && '💡 Contacta para re-engancharlos'}
+                {filtroActivo === 'cancelaron_recientemente' && '💡 Pregunta el motivo de la cancelación'}
+                {filtroActivo === 'sin_turno_programado' && '💡 Ofrece agendar su próximo turno'}
+              </p>
+            </div>
+          </div>
         )}
       </div>
 
@@ -327,33 +384,49 @@ export default function SeguimientoPacientes() {
                     </td>
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                       {diasUltimaVisita !== null ? (
-                        <span className={`text-sm font-medium ${
-                          diasUltimaVisita >= 18 && diasUltimaVisita <= 28 
-                            ? 'text-green-600' 
-                            : diasUltimaVisita > 28 
-                            ? 'text-red-600' 
-                            : 'text-gray-600'
-                        }`}>
-                          {diasUltimaVisita} días
-                        </span>
+                        <div>
+                          <span className={`text-sm font-semibold ${
+                            diasUltimaVisita >= 18 && diasUltimaVisita <= 28 
+                              ? 'text-green-600' 
+                              : diasUltimaVisita > 30 
+                              ? 'text-red-600' 
+                              : 'text-gray-600'
+                          }`}>
+                            {diasUltimaVisita} días
+                          </span>
+                          <div className="text-xs text-gray-500 mt-0.5">
+                            {format(new Date(paciente.ultima_visita!), 'dd/MM/yyyy')}
+                          </div>
+                        </div>
                       ) : (
-                        <span className="text-sm text-gray-400">Sin visitas</span>
+                        <span className="text-sm text-gray-400">Nunca</span>
                       )}
                     </td>
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                      <span className={`text-sm font-medium ${
-                        paciente.turnos_cancelados_recientes > 0 ? 'text-red-600' : 'text-gray-600'
-                      }`}>
-                        {paciente.turnos_cancelados_recientes}
-                      </span>
+                      {paciente.turnos_cancelados_recientes > 0 ? (
+                        <div>
+                          <span className="text-sm font-semibold text-red-600">
+                            {paciente.turnos_cancelados_recientes} cancelación{paciente.turnos_cancelados_recientes !== 1 ? 'es' : ''}
+                          </span>
+                          {diasUltimoCancelado !== null && (
+                            <div className="text-xs text-gray-500 mt-0.5">
+                              Hace {diasUltimoCancelado} días
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-400">Ninguna</span>
+                      )}
                     </td>
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                      {diasUltimoCancelado !== null ? (
-                        <span className="text-sm text-gray-600">
-                          {diasUltimoCancelado} días
+                      {pacientesConTurno.has(paciente.id) ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          ✓ Con turno
                         </span>
                       ) : (
-                        <span className="text-sm text-gray-400">-</span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          ⚠ Sin turno
+                        </span>
                       )}
                     </td>
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
