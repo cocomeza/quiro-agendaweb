@@ -7,6 +7,7 @@ import { Calendar, ChevronLeft, ChevronRight, Plus, Printer, Phone, Copy, AlertC
 import ResumenDia from './ResumenDia';
 import BusquedaRapida from './BusquedaRapida';
 import VistaImpresionTurnos from './VistaImpresionTurnos';
+import ListaPacientesDia from './ListaPacientesDia';
 import { copiarAlPortapapeles, esTurnoProximo, esTurnoAtrasado } from '@/lib/utils';
 import { showSuccess, showError } from '@/lib/toast';
 
@@ -316,6 +317,11 @@ export default function AgendaDiaria({
           </div>
         )}
       </div>
+      </div>
+
+      {/* Lista de pacientes con turno del día */}
+      <div className="mt-6 no-print">
+        <ListaPacientesDia turnos={turnos} fecha={fechaSeleccionada} />
       </div>
     </>
   );

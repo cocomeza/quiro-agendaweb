@@ -70,11 +70,14 @@ input, select, textarea {
   }
   
   .print-agenda,
-  .print-agenda * {
+  .print-agenda *,
+  .print-lista-pacientes,
+  .print-lista-pacientes * {
     visibility: visible;
   }
   
-  .print-agenda {
+  .print-agenda,
+  .print-lista-pacientes {
     position: absolute;
     left: 0;
     top: 0;
@@ -98,25 +101,30 @@ input, select, textarea {
   }
 
   /* Mejorar legibilidad en impresión */
-  .print-agenda table {
+  .print-agenda table,
+  .print-lista-pacientes table {
     border-collapse: collapse;
     width: 100%;
   }
 
   .print-agenda th,
-  .print-agenda td {
+  .print-agenda td,
+  .print-lista-pacientes th,
+  .print-lista-pacientes td {
     border: 1px solid #ddd;
     padding: 8px;
   }
 
-  .print-agenda th {
+  .print-agenda th,
+  .print-lista-pacientes th {
     background-color: #f3f4f6 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
   /* Asegurar que los colores se impriman */
-  .print-agenda {
+  .print-agenda,
+  .print-lista-pacientes {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
