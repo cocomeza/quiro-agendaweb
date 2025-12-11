@@ -6,6 +6,7 @@ import type { Paciente } from '@/lib/supabase/types';
 import { X, FileText } from 'lucide-react';
 import { showSuccess, showError } from '@/lib/toast';
 import { validarEmail, validarTelefono, obtenerMensajeError, esErrorDeRed } from '@/lib/validaciones';
+import { obtenerSiguienteNumeroFicha } from '@/lib/utils-fichas';
 
 interface ModalPacienteProps {
   paciente: Paciente | null;
@@ -36,13 +37,20 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
       setNotas(paciente.notas || '');
       setNumeroFicha(paciente.numero_ficha || '');
     } else {
+      // Si es un paciente nuevo, obtener el siguiente número de ficha automáticamente
       setNombre('');
       setApellido('');
       setTelefono('');
       setEmail('');
       setFechaNacimiento('');
       setNotas('');
-      setNumeroFicha('');
+      // Obtener el siguiente número de ficha disponible
+      obtenerSiguienteNumeroFicha().then(siguienteFicha => {
+        setNumeroFicha(siguienteFicha);
+      }).catch(err => {
+        console.error('Error al obtener siguiente número de ficha:', err);
+        setNumeroFicha('');
+      });
     }
   }, [paciente]);
 
@@ -254,7 +262,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
 
           <div>
             <label htmlFor="numeroFicha" className="block text-sm font-medium text-gray-700 mb-1">
-              Número de Ficha
+              Número de Ficha {!paciente && <span className="text-xs text-gray-500 font-normal">(auto-generado)</span>}
             </label>
             <input
               id="numeroFicha"
@@ -262,8 +270,12 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
               maxLength={20}
               value={numeroFicha}
               onChange={(e) => setNumeroFicha(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Ej: 98, 317, 417..."
+              className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                !paciente ? 'bg-gray-50 cursor-not-allowed' : ''
+              }`}
+              placeholder={paciente ? "Ej: 98, 317, 417..." : "Se asignará automáticamente..."}
+              readOnly={!paciente}
+              title={!paciente ? "El número de ficha se asigna automáticamente basado en el último número de ficha existente" : ""}
             />
           </div>
 
