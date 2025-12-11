@@ -83,6 +83,7 @@ interface SupabasePatient {
   llamado_telefono?: boolean;
   fecha_ultimo_llamado?: string | null;
   notas: string | null;
+  numero_ficha: string | null;
 }
 
 function normalizeField(data: FrontmyPatient, ...possibleKeys: string[]): string | undefined {
@@ -196,6 +197,18 @@ function mapFrontmyToSupabase(frontmyData: FrontmyPatient): SupabasePatient | nu
     'Notes'
   ) || null;
 
+  // Normalizar número de ficha médica
+  const numero_ficha = normalizeField(
+    frontmyData,
+    'Ficha',
+    'ficha',
+    'numero_ficha',
+    'Numero Ficha',
+    'Número Ficha',
+    'numero',
+    'Numero'
+  ) || null;
+
   // Construir objeto solo con campos que existen en la BD
   const paciente: any = {
     nombre: nombre || 'Sin nombre',
@@ -204,6 +217,7 @@ function mapFrontmyToSupabase(frontmyData: FrontmyPatient): SupabasePatient | nu
     email: email || null,
     fecha_nacimiento: fecha_nacimiento,
     notas: notas,
+    numero_ficha: numero_ficha,
   };
   
   // Agregar campos opcionales solo si existen en el schema

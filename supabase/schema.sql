@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS pacientes (
   llamado_telefono BOOLEAN DEFAULT false,
   fecha_ultimo_llamado DATE,
   notas TEXT,
+  numero_ficha VARCHAR(20),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );

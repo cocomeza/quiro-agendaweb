@@ -15,6 +15,7 @@ export interface Paciente {
   ultima_visita: string | null;
   llamado_telefono: boolean;
   fecha_ultimo_llamado: string | null;
+  numero_ficha: string | null;
   motivo_consulta?: string | null;
   antecedentes_medicos?: string | null;
   medicamentos_actuales?: string | null;

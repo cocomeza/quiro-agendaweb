@@ -20,6 +20,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
   const [email, setEmail] = useState('');
   const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [notas, setNotas] = useState('');
+  const [numeroFicha, setNumeroFicha] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,6 +34,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
       setEmail(paciente.email || '');
       setFechaNacimiento(paciente.fecha_nacimiento || '');
       setNotas(paciente.notas || '');
+      setNumeroFicha(paciente.numero_ficha || '');
     } else {
       setNombre('');
       setApellido('');
@@ -40,6 +42,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
       setEmail('');
       setFechaNacimiento('');
       setNotas('');
+      setNumeroFicha('');
     }
   }, [paciente]);
 
@@ -87,6 +90,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
             email: email || null,
             fecha_nacimiento: fechaNacimiento || null,
             notas: notas || null,
+            numero_ficha: numeroFicha || null,
           })
           .eq('id', paciente.id);
 
@@ -103,6 +107,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
             email: email || null,
             fecha_nacimiento: fechaNacimiento || null,
             notas: notas || null,
+            numero_ficha: numeroFicha || null,
           });
 
         if (insertError) throw insertError;
