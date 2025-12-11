@@ -253,6 +253,21 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
           </div>
 
           <div>
+            <label htmlFor="numeroFicha" className="block text-sm font-medium text-gray-700 mb-1">
+              Número de Ficha
+            </label>
+            <input
+              id="numeroFicha"
+              type="text"
+              maxLength={20}
+              value={numeroFicha}
+              onChange={(e) => setNumeroFicha(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Ej: 98, 317, 417..."
+            />
+          </div>
+
+          <div>
             <label htmlFor="notas" className="block text-sm font-medium text-gray-700 mb-1">
               Notas
             </label>

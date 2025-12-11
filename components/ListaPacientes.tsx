@@ -139,9 +139,16 @@ export default function ListaPacientes({
                     className="flex-1 min-w-0 cursor-pointer"
                     onClick={() => onAbrirModalPaciente(paciente)}
                   >
-                    <h3 className="text-base sm:text-lg font-medium text-gray-900">
-                      {paciente.nombre} {paciente.apellido}
-                    </h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900">
+                        {paciente.nombre} {paciente.apellido}
+                      </h3>
+                      {paciente.numero_ficha && (
+                        <span className="px-2 py-0.5 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded-md">
+                          Ficha: {paciente.numero_ficha}
+                        </span>
+                      )}
+                    </div>
                     <div className="mt-2 flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
                       {paciente.telefono && (
                         <div className="flex items-center gap-1 group">
