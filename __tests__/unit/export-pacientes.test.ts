@@ -186,14 +186,18 @@ describe('exportarPacientesJSON', () => {
       } as Paciente,
     ];
 
-    // Verificar que se crea el blob con JSON
-    const blobSpy = vi.spyOn(global, 'Blob' as any);
+    // Mock Blob correctamente
+    let blobContent: string = '';
+    global.Blob = class MockBlob {
+      constructor(public parts: any[], public options: any) {
+        blobContent = parts[0];
+      }
+    } as any;
+
     exportarPacientesJSON(pacientes, 'test');
 
-    expect(blobSpy).toHaveBeenCalled();
-    const jsonContent = blobSpy.mock.calls[0][0][0];
-    const datos = JSON.parse(jsonContent);
-
+    expect(blobContent).toBeTruthy();
+    const datos = JSON.parse(blobContent);
     expect(datos).toHaveProperty('fecha_exportacion');
     expect(datos).toHaveProperty('total_pacientes', 1);
     expect(datos).toHaveProperty('pacientes');
