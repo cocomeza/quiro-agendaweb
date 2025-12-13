@@ -10,6 +10,36 @@ interface ListaPacientesDiaProps {
   fecha: Date;
 }
 
+// Helper para asegurar que siempre se devuelva un string válido
+const safeString = (value: any): string => {
+  if (value === null || value === undefined) {
+    return '-';
+  }
+  const str = String(value);
+  return str.trim() === '' ? '-' : str;
+};
+
+// Helper para formatear fecha de forma segura
+const safeFormatDate = (date: Date | null | undefined, formatStr: string): string => {
+  try {
+    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+      return 'Fecha inválida';
+    }
+    const formatted = format(date, formatStr, { locale: es });
+    return safeString(formatted);
+  } catch (error) {
+    console.error('Error al formatear fecha:', error);
+    try {
+      if (date && date instanceof Date) {
+        return safeString(date.toLocaleDateString('es-ES'));
+      }
+      return 'Fecha inválida';
+    } catch {
+      return 'Fecha no disponible';
+    }
+  }
+};
+
 export default function ListaPacientesDia({ turnos, fecha }: ListaPacientesDiaProps) {
   // Filtrar solo turnos programados y completados (no cancelados)
   // y que tengan datos del paciente (nombre y apellido mínimo)
@@ -56,7 +86,7 @@ export default function ListaPacientesDia({ turnos, fecha }: ListaPacientesDiaPr
               Lista de Pacientes con Turno
             </h3>
             <p className="text-sm print:text-xl print:font-semibold text-gray-600 print:text-gray-700 mt-1 print:mt-0">
-              {format(fecha, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
+              {safeFormatDate(fecha, "EEEE, d 'de' MMMM 'de' yyyy")}
             </p>
             <p className="hidden print:block text-sm text-gray-600 mt-2">
               Total de pacientes: {turnosOrdenados.length}
@@ -116,19 +146,19 @@ export default function ListaPacientesDia({ turnos, fecha }: ListaPacientesDiaPr
                       className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-indigo-50 print:hover:bg-inherit transition`}
                     >
                       <td className="border border-gray-300 px-3 sm:px-4 print:px-4 py-2 sm:py-3 print:py-3 text-xs sm:text-sm print:text-base text-gray-900 font-medium">
-                        {turno.pacientes?.numero_ficha || '-'}
+                        {safeString(turno.pacientes?.numero_ficha)}
                       </td>
                       <td className="border border-gray-300 px-3 sm:px-4 print:px-4 py-2 sm:py-3 print:py-3 text-xs sm:text-sm print:text-base text-gray-900 font-semibold">
-                        {turno.pacientes?.apellido || '-'}
+                        {safeString(turno.pacientes?.apellido)}
                       </td>
                       <td className="border border-gray-300 px-3 sm:px-4 print:px-4 py-2 sm:py-3 print:py-3 text-xs sm:text-sm print:text-base text-gray-900 font-semibold">
-                        {turno.pacientes?.nombre || '-'}
+                        {safeString(turno.pacientes?.nombre)}
                       </td>
                       <td className="border border-gray-300 px-3 sm:px-4 print:px-4 py-2 sm:py-3 print:py-3 text-xs sm:text-sm print:text-base text-gray-900">
-                        {turno.pacientes?.telefono || '-'}
+                        {safeString(turno.pacientes?.telefono)}
                       </td>
                       <td className="border border-gray-300 px-3 sm:px-4 print:px-4 py-2 sm:py-3 print:py-3 text-xs sm:text-sm print:text-base text-gray-900 font-medium">
-                        {turno.hora ? turno.hora.slice(0, 5) : '-'}
+                        {turno.hora && typeof turno.hora === 'string' ? safeString(turno.hora.slice(0, 5)) : '-'}
                       </td>
                     </tr>
                   );
@@ -149,7 +179,7 @@ export default function ListaPacientesDia({ turnos, fecha }: ListaPacientesDiaPr
 
         {/* Pie de página - solo visible al imprimir */}
         <div className="hidden print:block mt-8 pt-4 border-t border-gray-300 text-sm text-gray-600 text-center">
-          <p>Impreso el {format(new Date(), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}</p>
+          <p>Impreso el {safeFormatDate(new Date(), "dd/MM/yyyy 'a las' HH:mm")}</p>
         </div>
       </div>
     </div>
