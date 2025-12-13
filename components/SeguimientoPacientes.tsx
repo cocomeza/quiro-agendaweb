@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Paciente } from '@/lib/supabase/types';
 import { differenceInDays, format } from 'date-fns';
@@ -38,11 +38,7 @@ export default function SeguimientoPacientes() {
   const [pacientesConTurno, setPacientesConTurno] = useState<Set<string>>(new Set());
   const supabase = createClient();
 
-  useEffect(() => {
-    cargarPacientes();
-  }, [filtroActivo]);
-
-  const cargarPacientes = async () => {
+  const cargarPacientes = useCallback(async () => {
     setLoading(true);
     try {
       // Cargar pacientes con información de turnos
@@ -172,7 +168,11 @@ export default function SeguimientoPacientes() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filtroActivo, supabase]);
+
+  useEffect(() => {
+    cargarPacientes();
+  }, [cargarPacientes]);
 
   const marcarComoLlamado = async (pacienteId: string) => {
     try {

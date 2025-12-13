@@ -22,6 +22,8 @@ interface ModalTurnoProps {
   pacientes: Paciente[];
   fecha: Date;
   onClose: () => void;
+  onAbrirModalPaciente?: (paciente?: Paciente) => void;
+  onAbrirFichaMedica?: (paciente: Paciente) => void;
 }
 
 export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirModalPaciente, onAbrirFichaMedica }: ModalTurnoProps) {
