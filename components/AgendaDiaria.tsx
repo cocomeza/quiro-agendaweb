@@ -42,31 +42,37 @@ export default function AgendaDiaria({
   onAbrirModalPaciente,
 }: AgendaDiariaProps) {
   // Normalizar las horas a formato HH:MM para que coincidan con las franjas horarias
-  const turnosPorHora = turnos.reduce((acc, turno) => {
-    // Normalizar hora: convertir "08:00:00" a "08:00" o mantener "08:00"
-    // También manejar casos como "8:00" -> "08:00"
-    let horaNormalizada = turno.hora.trim();
-    
-    // Si tiene segundos, removerlos
-    if (horaNormalizada.length > 5) {
-      horaNormalizada = horaNormalizada.slice(0, 5);
-    }
-    
-    // Asegurar formato HH:MM (agregar cero inicial si es necesario)
-    const partes = horaNormalizada.split(':');
-    if (partes.length === 2) {
-      const horas = partes[0].padStart(2, '0');
-      const minutos = partes[1].padStart(2, '0');
-      horaNormalizada = `${horas}:${minutos}`;
-    }
-    
-    acc[horaNormalizada] = turno;
-    return acc;
-  }, {} as Record<string, TurnoConPaciente>);
+  // Solo procesar turnos que tengan pacientes válidos
+  const turnosPorHora = turnos
+    .filter(turno => turno && turno.pacientes && turno.hora)
+    .reduce((acc, turno) => {
+      // Normalizar hora: convertir "08:00:00" a "08:00" o mantener "08:00"
+      // También manejar casos como "8:00" -> "08:00"
+      let horaNormalizada = turno.hora.trim();
+      
+      // Si tiene segundos, removerlos
+      if (horaNormalizada.length > 5) {
+        horaNormalizada = horaNormalizada.slice(0, 5);
+      }
+      
+      // Asegurar formato HH:MM (agregar cero inicial si es necesario)
+      const partes = horaNormalizada.split(':');
+      if (partes.length === 2) {
+        const horas = partes[0].padStart(2, '0');
+        const minutos = partes[1].padStart(2, '0');
+        horaNormalizada = `${horas}:${minutos}`;
+      }
+      
+      acc[horaNormalizada] = turno;
+      return acc;
+    }, {} as Record<string, TurnoConPaciente>);
   
   // Debug: mostrar turnos cargados (solo en desarrollo)
   if (process.env.NODE_ENV === 'development' && turnos.length > 0) {
-    console.log('Turnos cargados:', turnos.map(t => ({ hora: t.hora, paciente: `${t.pacientes.nombre} ${t.pacientes.apellido}` })));
+    console.log('Turnos cargados:', turnos.map(t => ({ 
+      hora: t.hora, 
+      paciente: t.pacientes ? `${t.pacientes.nombre || ''} ${t.pacientes.apellido || ''}` : 'Sin paciente' 
+    })));
     console.log('Turnos por hora mapeados:', Object.keys(turnosPorHora));
   }
 
@@ -317,8 +323,16 @@ export default function AgendaDiaria({
                   type="date"
                   value={format(fechaParaImprimir, 'yyyy-MM-dd')}
                   onChange={(e) => {
-                    const nuevaFecha = new Date(e.target.value);
-                    setFechaParaImprimir(nuevaFecha);
+                    try {
+                      if (e.target.value) {
+                        const nuevaFecha = new Date(e.target.value + 'T00:00:00');
+                        if (!isNaN(nuevaFecha.getTime())) {
+                          setFechaParaImprimir(nuevaFecha);
+                        }
+                      }
+                    } catch (error) {
+                      console.error('Error al cambiar fecha:', error);
+                    }
                   }}
                   className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 text-sm font-medium"
                 />
@@ -430,13 +444,24 @@ export default function AgendaDiaria({
                 <div
                   key={hora}
                   className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-indigo-50/50 transition-all cursor-pointer group"
-                  onClick={() => turno ? onAbrirModalTurno(turno) : onAbrirModalTurno()}
+                  onClick={() => {
+                    try {
+                      if (turno && turno.pacientes) {
+                        onAbrirModalTurno(turno);
+                      } else {
+                        onAbrirModalTurno();
+                      }
+                    } catch (error) {
+                      console.error('Error al abrir modal de turno:', error);
+                      onAbrirModalTurno();
+                    }
+                  }}
                 >
                   <div className="flex items-start gap-4">
                     <div className="w-16 sm:w-20 text-sm sm:text-base font-bold text-gray-600 flex-shrink-0 pt-1 group-hover:text-indigo-600 transition-colors">
                       {hora}
                     </div>
-                    {turno ? (
+                    {turno && turno.pacientes ? (
                       <div className={`flex-1 px-4 py-3 rounded-lg border-2 shadow-sm transition-all group-hover:shadow-md ${
                         esTurnoAtrasado(turno.fecha, turno.hora, turno.estado)
                           ? 'border-red-500 bg-red-50'
@@ -448,7 +473,7 @@ export default function AgendaDiaria({
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                               <p className="text-sm sm:text-base font-bold text-gray-900 truncate">
-                                {turno.pacientes.nombre} {turno.pacientes.apellido}
+                                {turno.pacientes?.nombre || 'Sin nombre'} {turno.pacientes?.apellido || ''}
                               </p>
                               {esTurnoAtrasado(turno.fecha, turno.hora, turno.estado) && (
                                 <span className="text-xs sm:text-sm px-2 sm:px-2.5 py-1 bg-red-600 text-white rounded-md flex items-center gap-1 font-semibold shadow-sm">
@@ -461,7 +486,7 @@ export default function AgendaDiaria({
                                   Próximo
                                 </span>
                               )}
-                              {turno.pacientes.fecha_nacimiento && (
+                              {turno.pacientes?.fecha_nacimiento && (
                                 <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-white bg-opacity-50 rounded">
                                   {(() => {
                                     const hoy = new Date();
@@ -485,7 +510,7 @@ export default function AgendaDiaria({
                                 </span>
                               )}
                             </div>
-                            {turno.pacientes.telefono && (
+                            {turno.pacientes?.telefono && (
                               <div className="flex items-center gap-1.5 sm:gap-2 mt-1">
                                 <p className="text-xs sm:text-sm text-gray-700 font-medium truncate">
                                   {turno.pacientes.telefono}
@@ -494,7 +519,9 @@ export default function AgendaDiaria({
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      window.location.href = `tel:${turno.pacientes.telefono}`;
+                                      if (turno.pacientes?.telefono) {
+                                        window.location.href = `tel:${turno.pacientes.telefono}`;
+                                      }
                                     }}
                                     className="p-1 sm:p-1.5 hover:bg-white hover:bg-opacity-50 rounded transition touch-manipulation"
                                     title="Llamar"
@@ -505,7 +532,7 @@ export default function AgendaDiaria({
                                   <button
                                     onClick={async (e) => {
                                       e.stopPropagation();
-                                      const copiado = await copiarAlPortapapeles(turno.pacientes.telefono || '');
+                                      const copiado = await copiarAlPortapapeles(turno.pacientes?.telefono || '');
                                       if (copiado) {
                                         showSuccess('✅ Teléfono copiado al portapapeles');
                                       } else {
