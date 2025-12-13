@@ -52,6 +52,7 @@ export default function VistaImpresionTurnos({ turnos, fecha }: VistaImpresionTu
             <thead>
               <tr className="bg-gray-100 border-b-2 border-gray-400">
                 <th className="text-left py-3 px-4 font-bold text-gray-900 text-base">Hora</th>
+                <th className="text-left py-3 px-4 font-bold text-gray-900 text-base">N° Ficha</th>
                 <th className="text-left py-3 px-4 font-bold text-gray-900 text-base">Paciente</th>
                 <th className="text-left py-3 px-4 font-bold text-gray-900 text-base">Teléfono</th>
                 <th className="text-left py-3 px-4 font-bold text-gray-900 text-base">Estado</th>
@@ -80,6 +81,9 @@ export default function VistaImpresionTurnos({ turnos, fecha }: VistaImpresionTu
                   >
                     <td className="py-3 px-4 font-medium text-gray-900 text-base">
                       {turno.hora}
+                    </td>
+                    <td className="py-3 px-4 text-gray-900 text-base font-medium">
+                      {turno.pacientes.numero_ficha || '-'}
                     </td>
                     <td className="py-3 px-4 text-gray-900 text-base">
                       <div className="font-medium">

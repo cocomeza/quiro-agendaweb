@@ -191,10 +191,10 @@ export default function VistaCalendario({
                             {turnosDelDia.slice(0, 3).map((turno, idx) => {
                               const colorEstado =
                                 turno.estado === 'completado'
-                                  ? 'bg-green-500'
+                                  ? 'bg-green-600 text-white border-green-700'
                                   : turno.estado === 'cancelado'
-                                  ? 'bg-red-500'
-                                  : 'bg-blue-500';
+                                  ? 'bg-red-600 text-white border-red-700'
+                                  : 'bg-blue-600 text-white border-blue-700';
                               return (
                                 <div
                                   key={turno.id}
@@ -202,8 +202,8 @@ export default function VistaCalendario({
                                     e.stopPropagation();
                                     onAbrirModalTurno(turno);
                                   }}
-                                  className={`${colorEstado} text-white text-[10px] sm:text-xs px-1.5 py-1 mb-0.5 rounded-md truncate cursor-pointer hover:opacity-90 font-semibold shadow-sm`}
-                                  title={`${turno.pacientes.nombre} ${turno.pacientes.apellido} - ${turno.hora}`}
+                                  className={`${colorEstado} border-2 text-[10px] sm:text-xs px-1.5 py-1 mb-0.5 rounded-md truncate cursor-pointer hover:opacity-90 hover:shadow-md font-bold shadow-sm transition-all`}
+                                  title={`${turno.pacientes.nombre} ${turno.pacientes.apellido} - ${turno.hora} - ${turno.estado}`}
                                 >
                                   {turno.hora} {turno.pacientes.nombre.split(' ')[0]}
                                 </div>
@@ -241,16 +241,16 @@ export default function VistaCalendario({
             <div className="mt-4 sm:mt-6 pt-4 border-t border-gray-200">
               <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                  <span className="text-gray-700">Programado</span>
+                  <div className="w-4 h-4 bg-blue-600 border-2 border-blue-700 rounded shadow-sm"></div>
+                  <span className="text-gray-900 font-semibold">Programado</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-500 rounded"></div>
-                  <span className="text-gray-700">Completado</span>
+                  <div className="w-4 h-4 bg-green-600 border-2 border-green-700 rounded shadow-sm"></div>
+                  <span className="text-gray-900 font-semibold">Completado</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-red-500 rounded"></div>
-                  <span className="text-gray-700">Cancelado</span>
+                  <div className="w-4 h-4 bg-red-600 border-2 border-red-700 rounded shadow-sm"></div>
+                  <span className="text-gray-900 font-semibold">Cancelado</span>
                 </div>
               </div>
             </div>

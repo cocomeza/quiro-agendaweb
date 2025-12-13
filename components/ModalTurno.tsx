@@ -9,10 +9,12 @@ import { showSuccess, showError } from '@/lib/toast';
 import { obtenerMensajeError, esErrorDeRed } from '@/lib/validaciones';
 
 const FRANJAS_HORARIAS = [
-  '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
-  '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
-  '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
-  '17:00', '17:30', '18:00', '18:30', '19:00', '19:30',
+  '08:00', '08:15', '08:30', '08:45', '09:00', '09:15', '09:30', '09:45',
+  '10:00', '10:15', '10:30', '10:45', '11:00', '11:15', '11:30', '11:45',
+  '12:00', '12:15', '12:30', '12:45', '13:00', '13:15', '13:30', '13:45',
+  '14:00', '14:15', '14:30', '14:45', '15:00', '15:15', '15:30', '15:45',
+  '16:00', '16:15', '16:30', '16:45', '17:00', '17:15', '17:30', '17:45',
+  '18:00', '18:15', '18:30', '18:45', '19:00', '19:15', '19:30', '19:45',
 ];
 
 interface ModalTurnoProps {
@@ -25,6 +27,7 @@ interface ModalTurnoProps {
 export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTurnoProps) {
   const [pacienteId, setPacienteId] = useState('');
   const [hora, setHora] = useState('');
+  const [fechaTurno, setFechaTurno] = useState(fecha);
   const [estado, setEstado] = useState<'programado' | 'completado' | 'cancelado'>('programado');
   const [pago, setPago] = useState<'pagado' | 'impago'>('impago');
   const [notas, setNotas] = useState('');
@@ -37,17 +40,19 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
     if (turno) {
       setPacienteId(turno.paciente_id);
       setHora(turno.hora);
+      setFechaTurno(new Date(turno.fecha));
       setEstado(turno.estado as 'programado' | 'completado' | 'cancelado');
       setPago(turno.pago || 'impago');
       setNotas(turno.notas || '');
     } else {
       setPacienteId('');
       setHora('');
+      setFechaTurno(fecha);
       setEstado('programado');
       setPago('impago');
       setNotas('');
     }
-  }, [turno]);
+  }, [turno, fecha]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +77,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
     setIsSubmitting(true);
 
     try {
-      const fechaStr = format(fecha, 'yyyy-MM-dd');
+      const fechaStr = format(fechaTurno, 'yyyy-MM-dd');
 
       if (turno) {
         // Validar que el nuevo horario no esté ocupado por otro turno
@@ -90,11 +95,12 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
           throw new Error('Ya existe un turno en este horario');
         }
 
-        // Actualizar turno existente
+        // Actualizar turno existente (incluyendo fecha si cambió)
         const { error: updateError } = await supabase
           .from('turnos')
           .update({
             paciente_id: pacienteId,
+            fecha: fechaStr,
             hora,
             estado,
             pago,
@@ -220,14 +226,18 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
 
           <div>
             <label htmlFor="fecha" className="block text-sm font-medium text-gray-700 mb-1">
-              Fecha
+              Fecha {turno ? '(puede cambiar a fecha posterior)' : ''}
             </label>
             <input
               id="fecha"
-              type="text"
-              value={format(fecha, 'dd/MM/yyyy')}
-              disabled
-              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600"
+              type="date"
+              value={format(fechaTurno, 'yyyy-MM-dd')}
+              onChange={(e) => {
+                const nuevaFecha = new Date(e.target.value);
+                setFechaTurno(nuevaFecha);
+              }}
+              min={turno ? undefined : format(fecha, 'yyyy-MM-dd')}
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 font-medium"
             />
           </div>
 

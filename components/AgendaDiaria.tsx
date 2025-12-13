@@ -4,6 +4,8 @@ import { format, isToday } from 'date-fns';
 import { es } from 'date-fns/locale/es';
 import type { TurnoConPaciente, TurnoConPago, Paciente } from '@/lib/supabase/types';
 import { Calendar, ChevronLeft, ChevronRight, Plus, Printer, Phone, Copy, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import ResumenDia from './ResumenDia';
 import BusquedaRapida from './BusquedaRapida';
 import VistaImpresionTurnos from './VistaImpresionTurnos';
@@ -12,10 +14,12 @@ import { copiarAlPortapapeles, esTurnoProximo, esTurnoAtrasado } from '@/lib/uti
 import { showSuccess, showError } from '@/lib/toast';
 
 const FRANJAS_HORARIAS = [
-  '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
-  '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
-  '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
-  '17:00', '17:30', '18:00', '18:30', '19:00', '19:30',
+  '08:00', '08:15', '08:30', '08:45', '09:00', '09:15', '09:30', '09:45',
+  '10:00', '10:15', '10:30', '10:45', '11:00', '11:15', '11:30', '11:45',
+  '12:00', '12:15', '12:30', '12:45', '13:00', '13:15', '13:30', '13:45',
+  '14:00', '14:15', '14:30', '14:45', '15:00', '15:15', '15:30', '15:45',
+  '16:00', '16:15', '16:30', '16:45', '17:00', '17:15', '17:30', '17:45',
+  '18:00', '18:15', '18:30', '18:45', '19:00', '19:15', '19:30', '19:45',
 ];
 
 interface AgendaDiariaProps {
@@ -79,15 +83,63 @@ export default function AgendaDiaria({
     }
   };
 
+  const [mostrarSelectorFecha, setMostrarSelectorFecha] = useState(false);
+  const [fechaParaImprimir, setFechaParaImprimir] = useState(fechaSeleccionada);
+  const [turnosParaImprimir, setTurnosParaImprimir] = useState<TurnoConPaciente[]>(turnos);
+  const [cargandoTurnosImpresion, setCargandoTurnosImpresion] = useState(false);
+  const supabase = createClient();
+
+  // Actualizar turnos para imprimir cuando cambia la fecha seleccionada
+  useEffect(() => {
+    setTurnosParaImprimir(turnos);
+    setFechaParaImprimir(fechaSeleccionada);
+  }, [turnos, fechaSeleccionada]);
+
   const handleImprimir = () => {
-    // Mostrar vista de impresión antes de imprimir
+    // Mostrar selector de fecha si no está visible
+    if (!mostrarSelectorFecha) {
+      setMostrarSelectorFecha(true);
+      return;
+    }
+    // Si ya se seleccionó la fecha, imprimir
     window.print();
+  };
+
+  const handleConfirmarFechaImpresion = async () => {
+    setCargandoTurnosImpresion(true);
+    try {
+      const fechaStr = format(fechaParaImprimir, 'yyyy-MM-dd');
+      const { data: turnosData, error: turnosError } = await supabase
+        .from('turnos')
+        .select('*, pacientes(*)')
+        .eq('fecha', fechaStr)
+        .order('hora', { ascending: true });
+
+      if (turnosError) throw turnosError;
+
+      const turnosMapeados: TurnoConPaciente[] = (turnosData || []).map((turno: any) => ({
+        ...turno,
+        pacientes: Array.isArray(turno.pacientes) ? turno.pacientes[0] : turno.pacientes,
+      }));
+
+      setTurnosParaImprimir(turnosMapeados);
+      setMostrarSelectorFecha(false);
+      // Pequeño delay para que se actualice el estado antes de imprimir
+      setTimeout(() => {
+        window.print();
+      }, 100);
+    } catch (error) {
+      console.error('Error al cargar turnos para imprimir:', error);
+      showError('❌ Error al cargar turnos de la fecha seleccionada');
+    } finally {
+      setCargandoTurnosImpresion(false);
+    }
   };
 
   return (
     <>
       {/* Vista de impresión (solo visible al imprimir) */}
-      <VistaImpresionTurnos turnos={turnos} fecha={fechaSeleccionada} />
+      <VistaImpresionTurnos turnos={turnosParaImprimir} fecha={fechaParaImprimir} />
       
       {/* Vista normal (oculta al imprimir) */}
       <div className="bg-white rounded-lg shadow no-print">
@@ -154,6 +206,40 @@ export default function AgendaDiaria({
 
       {/* Botones de acción */}
       <div className="px-4 sm:px-6 py-4 border-b">
+        {mostrarSelectorFecha && (
+          <div className="mb-4 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              Seleccionar fecha para imprimir:
+            </label>
+            <div className="flex gap-2 items-center">
+              <input
+                type="date"
+                value={format(fechaParaImprimir, 'yyyy-MM-dd')}
+                onChange={(e) => {
+                  const nuevaFecha = new Date(e.target.value);
+                  setFechaParaImprimir(nuevaFecha);
+                }}
+                className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 text-sm font-medium"
+              />
+              <button
+                onClick={handleConfirmarFechaImpresion}
+                disabled={cargandoTurnosImpresion}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {cargandoTurnosImpresion ? 'Cargando...' : 'Imprimir'}
+              </button>
+              <button
+                onClick={() => {
+                  setMostrarSelectorFecha(false);
+                  setFechaParaImprimir(fechaSeleccionada);
+                }}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition text-sm font-semibold"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
         <div className="flex gap-2">
           <button
             onClick={handleImprimir}
