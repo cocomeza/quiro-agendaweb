@@ -85,13 +85,23 @@ export default function AgendaDiaria({
 
   const [mostrarSelectorFecha, setMostrarSelectorFecha] = useState(false);
   const [fechaParaImprimir, setFechaParaImprimir] = useState(fechaSeleccionada);
-  const [turnosParaImprimir, setTurnosParaImprimir] = useState<TurnoConPaciente[]>(turnos);
+  // Inicializar con turnos que tengan datos completos del paciente
+  const [turnosParaImprimir, setTurnosParaImprimir] = useState<TurnoConPaciente[]>(
+    turnos.filter(t => t.pacientes && t.pacientes.nombre && t.pacientes.apellido)
+  );
   const [cargandoTurnosImpresion, setCargandoTurnosImpresion] = useState(false);
   const supabase = createClient();
 
   // Actualizar turnos para imprimir cuando cambia la fecha seleccionada
+  // Asegurar que los turnos tengan datos completos del paciente
   useEffect(() => {
-    setTurnosParaImprimir(turnos);
+    // Filtrar solo turnos con datos completos del paciente
+    const turnosConDatosCompletos = turnos.filter(t => 
+      t.pacientes && 
+      t.pacientes.nombre && 
+      t.pacientes.apellido
+    );
+    setTurnosParaImprimir(turnosConDatosCompletos);
     setFechaParaImprimir(fechaSeleccionada);
   }, [turnos, fechaSeleccionada]);
 

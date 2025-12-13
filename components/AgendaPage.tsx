@@ -59,7 +59,20 @@ export default function AgendaPage() {
       // Cargar turnos del día (incluyendo campo pago y relación con pacientes)
       const { data: turnosData, error: turnosError } = await supabase
         .from('turnos')
-        .select('*, pacientes(*)')
+        .select(`
+          *,
+          pacientes (
+            id,
+            nombre,
+            apellido,
+            telefono,
+            email,
+            fecha_nacimiento,
+            numero_ficha,
+            direccion,
+            dni
+          )
+        `)
         .eq('fecha', fechaStr)
         .order('hora', { ascending: true });
 
