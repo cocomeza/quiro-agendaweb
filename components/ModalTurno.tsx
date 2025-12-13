@@ -270,11 +270,17 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
               required
               value={estado}
               onChange={(e) => setEstado(e.target.value as 'programado' | 'completado' | 'cancelado')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base"
+              className={`w-full px-4 py-2.5 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white font-bold text-sm sm:text-base ${
+                estado === 'completado' 
+                  ? 'border-green-500 text-green-700' 
+                  : estado === 'cancelado' 
+                  ? 'border-red-500 text-red-700' 
+                  : 'border-blue-500 text-blue-700'
+              }`}
             >
-              <option value="programado">Programado</option>
-              <option value="completado">Completado</option>
-              <option value="cancelado">Cancelado</option>
+              <option value="programado" className="text-blue-700 font-bold">Programado</option>
+              <option value="completado" className="text-green-700 font-bold">Completado</option>
+              <option value="cancelado" className="text-red-700 font-bold">Cancelado</option>
             </select>
           </div>
 

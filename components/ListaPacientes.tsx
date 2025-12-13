@@ -28,7 +28,8 @@ export default function ListaPacientes({
       paciente.nombre.toLowerCase().includes(termino) ||
       paciente.apellido.toLowerCase().includes(termino) ||
       paciente.telefono?.toLowerCase().includes(termino) ||
-      paciente.email?.toLowerCase().includes(termino)
+      paciente.email?.toLowerCase().includes(termino) ||
+      paciente.numero_ficha?.toLowerCase().includes(termino)
     );
   });
 
@@ -98,7 +99,7 @@ export default function ListaPacientes({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Buscar por nombre, apellido, teléfono o email..."
+            placeholder="Buscar por nombre, apellido, teléfono, email o número de ficha..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
@@ -187,7 +188,26 @@ export default function ListaPacientes({
                       )}
                       {paciente.fecha_nacimiento && (
                         <div>
-                          Nacimiento: {new Date(paciente.fecha_nacimiento).toLocaleDateString('es-AR')}
+                          <span className="font-semibold">Edad:</span> {(() => {
+                            const hoy = new Date();
+                            const nacimiento = new Date(paciente.fecha_nacimiento);
+                            let edad = hoy.getFullYear() - nacimiento.getFullYear();
+                            const mes = hoy.getMonth() - nacimiento.getMonth();
+                            if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+                              edad--;
+                            }
+                            return `${edad} años`;
+                          })()}
+                        </div>
+                      )}
+                      {paciente.dni && (
+                        <div>
+                          <span className="font-semibold">DNI:</span> {paciente.dni}
+                        </div>
+                      )}
+                      {paciente.direccion && (
+                        <div>
+                          <span className="font-semibold">Domicilio:</span> {paciente.direccion}
                         </div>
                       )}
                     </div>

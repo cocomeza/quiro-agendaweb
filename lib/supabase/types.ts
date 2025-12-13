@@ -8,6 +8,7 @@ export interface Paciente {
   email: string | null;
   fecha_nacimiento: string | null;
   direccion: string | null;
+  dni: string | null;
   observaciones: string | null;
   notas?: string | null;
   edad: number | null;
