@@ -104,7 +104,6 @@ export default function ListaPacientes({
     return (
       paciente.nombre.toLowerCase().includes(termino) ||
       paciente.apellido.toLowerCase().includes(termino) ||
-      (paciente.telefono && paciente.telefono.toLowerCase().includes(termino)) ||
       (paciente.email && paciente.email.toLowerCase().includes(termino)) ||
       (paciente.numero_ficha && paciente.numero_ficha.toLowerCase().includes(termino))
     );
@@ -176,7 +175,7 @@ export default function ListaPacientes({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Buscar por nombre, apellido, teléfono, email o número de ficha..."
+            placeholder="Buscar por nombre, apellido, email o número de ficha..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"

@@ -154,68 +154,54 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
 
           {/* Contenido de la ficha médica */}
           <div className="space-y-6">
-            {motivoConsulta && (
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
-                  Motivo de Consulta
-                </h3>
-                <p className="text-gray-700 whitespace-pre-wrap">{motivoConsulta}</p>
-              </div>
-            )}
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                Motivo de Consulta
+              </h3>
+              <p className="text-gray-700 whitespace-pre-wrap">{motivoConsulta || 'No especificado'}</p>
+            </div>
 
-            {antecedentesMedicos && (
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
-                  Antecedentes Médicos
-                </h3>
-                <p className="text-gray-700 whitespace-pre-wrap">{antecedentesMedicos}</p>
-              </div>
-            )}
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                Antecedentes Médicos
+              </h3>
+              <p className="text-gray-700 whitespace-pre-wrap">{antecedentesMedicos || 'No especificado'}</p>
+            </div>
 
-            {medicamentosActuales && (
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
-                  Medicamentos Actuales
-                </h3>
-                <p className="text-gray-700 whitespace-pre-wrap">{medicamentosActuales}</p>
-              </div>
-            )}
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                Medicamentos Actuales
+              </h3>
+              <p className="text-gray-700 whitespace-pre-wrap">{medicamentosActuales || 'No especificado'}</p>
+            </div>
 
-            {alergias && (
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
-                  Alergias
-                </h3>
-                <p className="text-gray-700 whitespace-pre-wrap">{alergias}</p>
-              </div>
-            )}
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                Alergias
+              </h3>
+              <p className="text-gray-700 whitespace-pre-wrap">{alergias || 'No especificado'}</p>
+            </div>
 
-            {diagnostico && (
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
-                  Diagnóstico
-                </h3>
-                <p className="text-gray-700 whitespace-pre-wrap">{diagnostico}</p>
-              </div>
-            )}
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                Diagnóstico
+              </h3>
+              <p className="text-gray-700 whitespace-pre-wrap">{diagnostico || 'No especificado'}</p>
+            </div>
 
-            {planTratamiento && (
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
-                  Plan de Tratamiento
-                </h3>
-                <p className="text-gray-700 whitespace-pre-wrap">{planTratamiento}</p>
-              </div>
-            )}
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                Plan de Tratamiento
+              </h3>
+              <p className="text-gray-700 whitespace-pre-wrap">{planTratamiento || 'No especificado'}</p>
+            </div>
 
-            {observacionesMedicas && (
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
-                  Observaciones Médicas
-                </h3>
-                <p className="text-gray-700 whitespace-pre-wrap">{observacionesMedicas}</p>
-              </div>
-            )}
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                Observaciones Médicas
+              </h3>
+              <p className="text-gray-700 whitespace-pre-wrap">{observacionesMedicas || 'No especificado'}</p>
+            </div>
           </div>
 
           {/* Pie de página */}
@@ -232,9 +218,12 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
           <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-indigo-50">
             <div className="flex items-center gap-3">
               <FileText className="w-6 h-6 text-indigo-600" />
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                Ficha Médica - {paciente.apellido}, {paciente.nombre}
-              </h2>
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                  Ficha Médica - {paciente.apellido}, {paciente.nombre}
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">Puedes editar y actualizar la información médica del paciente</p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <button

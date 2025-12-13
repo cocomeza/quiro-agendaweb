@@ -332,17 +332,57 @@ export default function AgendaDiaria({
                   </button>
                   <button
                     onClick={async () => {
-                      const turnosConPacientes = turnos.filter(t => t.pacientes && t.pacientes.nombre);
-                      setFechaParaImprimir(fechaSeleccionada);
-                      setTurnosParaImprimir(turnosConPacientes);
-                      setMostrarSelectorFecha(false);
-                      setTimeout(() => {
-                        window.print();
-                      }, 100);
+                      // Cargar datos completos del paciente para el día actual
+                      setCargandoTurnosImpresion(true);
+                      try {
+                        const fechaStr = format(fechaSeleccionada, 'yyyy-MM-dd');
+                        const { data: turnosData, error: turnosError } = await supabase
+                          .from('turnos')
+                          .select(`
+                            *,
+                            pacientes (
+                              id,
+                              nombre,
+                              apellido,
+                              telefono,
+                              email,
+                              fecha_nacimiento,
+                              numero_ficha,
+                              direccion,
+                              dni
+                            )
+                          `)
+                          .eq('fecha', fechaStr)
+                          .order('hora', { ascending: true });
+
+                        if (turnosError) throw turnosError;
+
+                        // Mapear correctamente los datos de pacientes
+                        const turnosMapeados: TurnoConPaciente[] = (turnosData || []).map((turno: any) => {
+                          const paciente = Array.isArray(turno.pacientes) ? turno.pacientes[0] : turno.pacientes;
+                          return {
+                            ...turno,
+                            pacientes: paciente || null,
+                          };
+                        }).filter((turno: TurnoConPaciente) => turno.pacientes !== null);
+
+                        setTurnosParaImprimir(turnosMapeados);
+                        setFechaParaImprimir(fechaSeleccionada);
+                        setMostrarSelectorFecha(false);
+                        setTimeout(() => {
+                          window.print();
+                        }, 200);
+                      } catch (error) {
+                        console.error('Error al cargar turnos para imprimir:', error);
+                        showError('❌ Error al cargar turnos del día actual');
+                      } finally {
+                        setCargandoTurnosImpresion(false);
+                      }
                     }}
-                    className="px-4 py-2.5 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition text-sm font-semibold"
+                    disabled={cargandoTurnosImpresion}
+                    className="px-4 py-2.5 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Día actual
+                    {cargandoTurnosImpresion ? 'Cargando...' : 'Día actual'}
                   </button>
                 </div>
               </div>
