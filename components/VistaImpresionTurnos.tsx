@@ -19,15 +19,13 @@ export default function VistaImpresionTurnos({ turnos, fecha }: VistaImpresionTu
   }, []);
 
   // Filtrar solo turnos programados y completados (no cancelados)
-  // y verificar que tengan datos completos del paciente (nombre, apellido, numero_ficha, telefono)
+  // y verificar que tengan al menos nombre y apellido del paciente
   const turnosParaImprimir = turnos.filter(t => {
     return (
       t.estado !== 'cancelado' && 
       t.pacientes && 
       t.pacientes.nombre && 
-      t.pacientes.apellido &&
-      t.pacientes.numero_ficha &&
-      t.pacientes.telefono
+      t.pacientes.apellido
     );
   });
   

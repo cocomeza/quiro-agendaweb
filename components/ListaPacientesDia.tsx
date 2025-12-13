@@ -12,7 +12,13 @@ interface ListaPacientesDiaProps {
 
 export default function ListaPacientesDia({ turnos, fecha }: ListaPacientesDiaProps) {
   // Filtrar solo turnos programados y completados (no cancelados)
-  const turnosActivos = turnos.filter(t => t.estado !== 'cancelado');
+  // y que tengan datos del paciente (nombre y apellido mínimo)
+  const turnosActivos = turnos.filter(t => 
+    t.estado !== 'cancelado' && 
+    t.pacientes && 
+    t.pacientes.nombre && 
+    t.pacientes.apellido
+  );
   
   // Ordenar por hora
   const turnosOrdenados = [...turnosActivos].sort((a, b) => {
@@ -24,7 +30,7 @@ export default function ListaPacientesDia({ turnos, fecha }: ListaPacientesDiaPr
   };
 
   return (
-    <div className="bg-white rounded-lg shadow">
+    <div className="bg-white rounded-lg shadow print-lista-pacientes">
       {/* Encabezado único - se adapta a pantalla e impresión */}
       <div className="px-4 sm:px-6 print:p-8 py-4 print:py-6 border-b print:border-b-2 print:border-gray-300">
         <div className="flex items-center justify-between print:flex-col print:text-center print:items-center">
@@ -81,28 +87,35 @@ export default function ListaPacientesDia({ turnos, fecha }: ListaPacientesDiaPr
                 </tr>
               </thead>
               <tbody>
-                {turnosOrdenados.map((turno, index) => (
-                  <tr 
-                    key={turno.id} 
-                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-indigo-50 print:hover:bg-inherit transition`}
-                  >
-                    <td className="border border-gray-300 px-3 sm:px-4 print:px-4 py-2 sm:py-3 print:py-3 text-xs sm:text-sm print:text-base text-gray-900 font-medium">
-                      {turno.pacientes.numero_ficha || '-'}
-                    </td>
-                    <td className="border border-gray-300 px-3 sm:px-4 print:px-4 py-2 sm:py-3 print:py-3 text-xs sm:text-sm print:text-base text-gray-900 font-semibold">
-                      {turno.pacientes.apellido}
-                    </td>
-                    <td className="border border-gray-300 px-3 sm:px-4 print:px-4 py-2 sm:py-3 print:py-3 text-xs sm:text-sm print:text-base text-gray-900 font-semibold">
-                      {turno.pacientes.nombre}
-                    </td>
-                    <td className="border border-gray-300 px-3 sm:px-4 print:px-4 py-2 sm:py-3 print:py-3 text-xs sm:text-sm print:text-base text-gray-900">
-                      {turno.pacientes.telefono || '-'}
-                    </td>
-                    <td className="border border-gray-300 px-3 sm:px-4 print:px-4 py-2 sm:py-3 print:py-3 text-xs sm:text-sm print:text-base text-gray-900 font-medium">
-                      {turno.hora.slice(0, 5)}
-                    </td>
-                  </tr>
-                ))}
+                {turnosOrdenados.map((turno, index) => {
+                  // Verificar que el paciente existe antes de renderizar
+                  if (!turno.pacientes || !turno.pacientes.nombre || !turno.pacientes.apellido) {
+                    return null;
+                  }
+                  
+                  return (
+                    <tr 
+                      key={turno.id} 
+                      className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-indigo-50 print:hover:bg-inherit transition`}
+                    >
+                      <td className="border border-gray-300 px-3 sm:px-4 print:px-4 py-2 sm:py-3 print:py-3 text-xs sm:text-sm print:text-base text-gray-900 font-medium">
+                        {turno.pacientes?.numero_ficha || '-'}
+                      </td>
+                      <td className="border border-gray-300 px-3 sm:px-4 print:px-4 py-2 sm:py-3 print:py-3 text-xs sm:text-sm print:text-base text-gray-900 font-semibold">
+                        {turno.pacientes?.apellido || '-'}
+                      </td>
+                      <td className="border border-gray-300 px-3 sm:px-4 print:px-4 py-2 sm:py-3 print:py-3 text-xs sm:text-sm print:text-base text-gray-900 font-semibold">
+                        {turno.pacientes?.nombre || '-'}
+                      </td>
+                      <td className="border border-gray-300 px-3 sm:px-4 print:px-4 py-2 sm:py-3 print:py-3 text-xs sm:text-sm print:text-base text-gray-900">
+                        {turno.pacientes?.telefono || '-'}
+                      </td>
+                      <td className="border border-gray-300 px-3 sm:px-4 print:px-4 py-2 sm:py-3 print:py-3 text-xs sm:text-sm print:text-base text-gray-900 font-medium">
+                        {turno.hora ? turno.hora.slice(0, 5) : '-'}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
