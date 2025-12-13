@@ -577,7 +577,7 @@ export default function AgendaDiaria({
       </div>
 
       {/* Lista de pacientes con turno del día */}
-      <div className="mt-6 no-print">
+      <div className="mt-6">
         <ListaPacientesDia turnos={turnos} fecha={fechaSeleccionada} />
       </div>
     </>

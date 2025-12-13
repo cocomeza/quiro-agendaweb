@@ -13,17 +13,34 @@ interface ListaPacientesDiaProps {
 export default function ListaPacientesDia({ turnos, fecha }: ListaPacientesDiaProps) {
   // Filtrar solo turnos programados y completados (no cancelados)
   // y que tengan datos del paciente (nombre y apellido mínimo)
-  const turnosActivos = turnos.filter(t => 
-    t.estado !== 'cancelado' && 
-    t.pacientes && 
-    t.pacientes.nombre && 
-    t.pacientes.apellido
-  );
+  const turnosActivos = turnos.filter(t => {
+    const tienePaciente = t.pacientes && t.pacientes.nombre && t.pacientes.apellido;
+    return t.estado !== 'cancelado' && tienePaciente;
+  });
   
   // Ordenar por hora
   const turnosOrdenados = [...turnosActivos].sort((a, b) => {
     return a.hora.localeCompare(b.hora);
   });
+
+  // Debug: verificar datos (solo en desarrollo)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('ListaPacientesDia - Turnos recibidos:', turnos.length);
+    console.log('ListaPacientesDia - Turnos activos:', turnosActivos.length);
+    console.log('ListaPacientesDia - Turnos ordenados:', turnosOrdenados.length);
+    if (turnosOrdenados.length > 0) {
+      console.log('ListaPacientesDia - Primer turno:', {
+        id: turnosOrdenados[0].id,
+        hora: turnosOrdenados[0].hora,
+        paciente: turnosOrdenados[0].pacientes ? {
+          nombre: turnosOrdenados[0].pacientes.nombre,
+          apellido: turnosOrdenados[0].pacientes.apellido,
+          numero_ficha: turnosOrdenados[0].pacientes.numero_ficha,
+          telefono: turnosOrdenados[0].pacientes.telefono
+        } : 'Sin paciente'
+      });
+    }
+  }
 
   const handleImprimir = () => {
     window.print();
