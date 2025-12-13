@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
 import type { Paciente, TurnoConPaciente, TurnoConPago } from '@/lib/supabase/types';
-import { X } from 'lucide-react';
+import { X, User, FileText, Trash2 } from 'lucide-react';
 import { showSuccess, showError } from '@/lib/toast';
 import { obtenerMensajeError, esErrorDeRed } from '@/lib/validaciones';
 
@@ -24,7 +24,7 @@ interface ModalTurnoProps {
   onClose: () => void;
 }
 
-export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTurnoProps) {
+export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirModalPaciente, onAbrirFichaMedica }: ModalTurnoProps) {
   const [pacienteId, setPacienteId] = useState('');
   const [hora, setHora] = useState('');
   const [fechaTurno, setFechaTurno] = useState(fecha);
@@ -34,6 +34,8 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fechaOriginal, setFechaOriginal] = useState<string>('');
+  const [horaOriginal, setHoraOriginal] = useState<string>('');
   const supabase = createClient();
 
   useEffect(() => {
@@ -44,6 +46,9 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
       setEstado(turno.estado as 'programado' | 'completado' | 'cancelado');
       setPago(turno.pago || 'impago');
       setNotas(turno.notas || '');
+      // Guardar fecha y hora originales para detectar cambios
+      setFechaOriginal(turno.fecha);
+      setHoraOriginal(turno.hora);
     } else {
       setPacienteId('');
       setHora('');
@@ -51,6 +56,8 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
       setEstado('programado');
       setPago('impago');
       setNotas('');
+      setFechaOriginal('');
+      setHoraOriginal('');
     }
   }, [turno, fecha]);
 
@@ -80,6 +87,13 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
       const fechaStr = format(fechaTurno, 'yyyy-MM-dd');
 
       if (turno) {
+        // Verificar si cambió la fecha o la hora
+        const fechaCambio = fechaStr !== fechaOriginal;
+        const horaCambio = hora !== horaOriginal;
+        
+        // Si cambió la fecha o la hora, el slot original se liberará automáticamente
+        // porque el turno se moverá a la nueva fecha/hora
+        
         // Validar que el nuevo horario no esté ocupado por otro turno
         const { data: turnoExistente, error: checkError } = await supabase
           .from('turnos')
@@ -96,6 +110,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
         }
 
         // Actualizar turno existente (incluyendo fecha si cambió)
+        // Al actualizar, el slot original (fechaOriginal, horaOriginal) se libera automáticamente
         const { error: updateError } = await supabase
           .from('turnos')
           .update({
@@ -109,7 +124,13 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
           .eq('id', turno.id);
 
         if (updateError) throw updateError;
-        showSuccess('✅ Turno actualizado exitosamente');
+        
+        // Mensaje informativo si se cambió la fecha o hora
+        if (fechaCambio || horaCambio) {
+          showSuccess(`✅ Turno actualizado exitosamente. El slot anterior (${format(new Date(fechaOriginal), 'dd/MM/yyyy')} ${horaOriginal}) quedó liberado.`);
+        } else {
+          showSuccess('✅ Turno actualizado exitosamente');
+        }
       } else {
         // Crear nuevo turno
         const { error: insertError } = await supabase
@@ -205,9 +226,45 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
           )}
 
           <div>
-            <label htmlFor="paciente" className="block text-sm font-semibold text-gray-900 mb-2">
-              Paciente *
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label htmlFor="paciente" className="block text-sm font-semibold text-gray-900">
+                Paciente *
+              </label>
+              {pacienteId && onAbrirModalPaciente && (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const paciente = pacientes.find(p => p.id === pacienteId);
+                      if (paciente) {
+                        onAbrirModalPaciente(paciente);
+                      }
+                    }}
+                    className="flex items-center gap-1 px-2 py-1 text-xs text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded transition"
+                    title="Editar información del paciente"
+                  >
+                    <User className="w-3 h-3" />
+                    Editar
+                  </button>
+                  {onAbrirFichaMedica && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const paciente = pacientes.find(p => p.id === pacienteId);
+                        if (paciente) {
+                          onAbrirFichaMedica(paciente);
+                        }
+                      }}
+                      className="flex items-center gap-1 px-2 py-1 text-xs text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded transition"
+                      title="Ver/Editar ficha médica"
+                    >
+                      <FileText className="w-3 h-3" />
+                      Ficha
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
             <select
               id="paciente"
               required
@@ -226,7 +283,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
 
           <div>
             <label htmlFor="fecha" className="block text-sm font-medium text-gray-700 mb-1">
-              Fecha {turno ? '(puede cambiar a fecha posterior)' : ''}
+              Fecha {turno ? '(al cambiar, el slot original quedará liberado)' : ''}
             </label>
             <input
               id="fecha"
@@ -239,11 +296,16 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
               min={turno ? undefined : format(fecha, 'yyyy-MM-dd')}
               className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 font-medium"
             />
+            {turno && format(fechaTurno, 'yyyy-MM-dd') !== fechaOriginal && (
+              <p className="mt-1 text-xs text-indigo-600">
+                ℹ️ El slot original ({format(new Date(fechaOriginal), 'dd/MM/yyyy')} {horaOriginal}) quedará disponible
+              </p>
+            )}
           </div>
 
           <div>
             <label htmlFor="hora" className="block text-sm font-medium text-gray-700 mb-1">
-              Hora *
+              Hora * {turno ? '(al cambiar, el slot original quedará liberado)' : ''}
             </label>
             <select
               id="hora"
@@ -259,6 +321,11 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose }: ModalTu
                 </option>
               ))}
             </select>
+            {turno && hora !== horaOriginal && format(fechaTurno, 'yyyy-MM-dd') === fechaOriginal && (
+              <p className="mt-1 text-xs text-indigo-600">
+                ℹ️ El slot original ({horaOriginal}) quedará disponible
+              </p>
+            )}
           </div>
 
           <div>

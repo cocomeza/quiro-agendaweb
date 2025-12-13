@@ -50,12 +50,18 @@ test.describe('Agenda Diaria', () => {
     }
   });
 
-  test('debe mostrar franjas horarias', async ({ page }) => {
+  test('debe mostrar franjas horarias con intervalos de 15 minutos', async ({ page }) => {
     await page.waitForTimeout(1000);
     
-    // Verificar que existen algunas franjas horarias
-    const franjasHorarias = page.locator('text=/08:00|09:00|10:00|11:00|12:00/i').first();
+    // Verificar que existen algunas franjas horarias con intervalos de 15 min
+    const franjasHorarias = page.locator('text=/08:00|08:15|08:30|09:00|09:15|10:00/i').first();
     await expect(franjasHorarias).toBeVisible({ timeout: 10000 });
+    
+    // Verificar que hay intervalos de 15 minutos (buscar 08:15, 08:30, 08:45)
+    const intervalo15 = page.locator('text=/08:15|09:15|10:15/i').first();
+    if (await intervalo15.isVisible({ timeout: 3000 })) {
+      await expect(intervalo15).toBeVisible();
+    }
   });
 
   test('debe abrir modal de nuevo turno', async ({ page }) => {

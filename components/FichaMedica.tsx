@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { PacienteConFichaMedica } from '@/lib/supabase/types';
-import { X, FileText, Save } from 'lucide-react';
+import { X, FileText, Save, Printer } from 'lucide-react';
 import { showSuccess, showError } from '@/lib/toast';
 import { obtenerMensajeError } from '@/lib/validaciones';
 import { logger } from '@/lib/logger';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale/es';
 
 interface FichaMedicaProps {
   paciente: PacienteConFichaMedica;
@@ -38,6 +40,10 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
       setObservacionesMedicas(paciente.observaciones_medicas || '');
     }
   }, [paciente]);
+
+  const handleImprimir = () => {
+    window.print();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,25 +82,178 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
     }
   };
 
+  // Calcular edad si tiene fecha de nacimiento
+  const calcularEdad = () => {
+    if (!paciente.fecha_nacimiento) return null;
+    const hoy = new Date();
+    const nacimiento = new Date(paciente.fecha_nacimiento);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+    return edad;
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-indigo-50">
-          <div className="flex items-center gap-3">
-            <FileText className="w-6 h-6 text-indigo-600" />
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-              Ficha Médica - {paciente.apellido}, {paciente.nombre}
-            </h2>
+    <>
+      {/* Vista de impresión (solo visible al imprimir) */}
+      <div className="print-ficha-medica hidden print:block">
+        <div className="p-8">
+          {/* Encabezado de impresión */}
+          <div className="text-center mb-8 border-b-2 border-gray-300 pb-4">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Ficha Médica
+            </h1>
+            <p className="text-xl text-gray-700">
+              {paciente.apellido}, {paciente.nombre}
+            </p>
+            {paciente.numero_ficha && (
+              <p className="text-lg text-gray-600 mt-2">
+                N° Ficha: {paciente.numero_ficha}
+              </p>
+            )}
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-200 rounded-md transition"
-            aria-label="Cerrar"
-          >
-            <X className="w-5 h-5 text-gray-600" />
-          </button>
+
+          {/* Información del paciente */}
+          <div className="mb-6 grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="font-semibold">Nombre completo:</span> {paciente.apellido}, {paciente.nombre}
+            </div>
+            {paciente.fecha_nacimiento && (
+              <div>
+                <span className="font-semibold">Fecha de nacimiento:</span> {format(new Date(paciente.fecha_nacimiento), 'dd/MM/yyyy', { locale: es })}
+              </div>
+            )}
+            {calcularEdad() !== null && (
+              <div>
+                <span className="font-semibold">Edad:</span> {calcularEdad()} años
+              </div>
+            )}
+            {paciente.telefono && (
+              <div>
+                <span className="font-semibold">Teléfono:</span> {paciente.telefono}
+              </div>
+            )}
+            {paciente.email && (
+              <div>
+                <span className="font-semibold">Email:</span> {paciente.email}
+              </div>
+            )}
+            {paciente.dni && (
+              <div>
+                <span className="font-semibold">DNI:</span> {paciente.dni}
+              </div>
+            )}
+            {paciente.direccion && (
+              <div className="col-span-2">
+                <span className="font-semibold">Domicilio:</span> {paciente.direccion}
+              </div>
+            )}
+          </div>
+
+          {/* Contenido de la ficha médica */}
+          <div className="space-y-6">
+            {motivoConsulta && (
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  Motivo de Consulta
+                </h3>
+                <p className="text-gray-700 whitespace-pre-wrap">{motivoConsulta}</p>
+              </div>
+            )}
+
+            {antecedentesMedicos && (
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  Antecedentes Médicos
+                </h3>
+                <p className="text-gray-700 whitespace-pre-wrap">{antecedentesMedicos}</p>
+              </div>
+            )}
+
+            {medicamentosActuales && (
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  Medicamentos Actuales
+                </h3>
+                <p className="text-gray-700 whitespace-pre-wrap">{medicamentosActuales}</p>
+              </div>
+            )}
+
+            {alergias && (
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  Alergias
+                </h3>
+                <p className="text-gray-700 whitespace-pre-wrap">{alergias}</p>
+              </div>
+            )}
+
+            {diagnostico && (
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  Diagnóstico
+                </h3>
+                <p className="text-gray-700 whitespace-pre-wrap">{diagnostico}</p>
+              </div>
+            )}
+
+            {planTratamiento && (
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  Plan de Tratamiento
+                </h3>
+                <p className="text-gray-700 whitespace-pre-wrap">{planTratamiento}</p>
+              </div>
+            )}
+
+            {observacionesMedicas && (
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2 border-b border-gray-300 pb-1">
+                  Observaciones Médicas
+                </h3>
+                <p className="text-gray-700 whitespace-pre-wrap">{observacionesMedicas}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Pie de página */}
+          <div className="mt-8 pt-4 border-t border-gray-300 text-center text-sm text-gray-600">
+            <p>Impreso el {format(new Date(), "dd/MM/yyyy 'a las' HH:mm", { locale: es })}</p>
+          </div>
         </div>
+      </div>
+
+      {/* Vista normal (oculta al imprimir) */}
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4 no-print">
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b bg-indigo-50">
+            <div className="flex items-center gap-3">
+              <FileText className="w-6 h-6 text-indigo-600" />
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                Ficha Médica - {paciente.apellido}, {paciente.nombre}
+              </h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleImprimir}
+                className="p-2 hover:bg-gray-200 rounded-md transition"
+                aria-label="Imprimir ficha médica"
+                title="Imprimir ficha médica"
+              >
+                <Printer className="w-5 h-5 text-gray-600" />
+              </button>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-200 rounded-md transition"
+                aria-label="Cerrar"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+          </div>
 
         {/* Contenido */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6">
@@ -233,8 +392,9 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
             </button>
           </div>
         </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

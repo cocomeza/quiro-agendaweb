@@ -27,8 +27,8 @@ test.describe('Gestión de Turnos', () => {
       // Seleccionar el primer paciente disponible (no el placeholder)
       await pacienteSelect.selectOption({ index: 1 });
       
-      // Seleccionar hora
-      await page.locator('select[id="hora"]').selectOption('10:30');
+      // Seleccionar hora (usar intervalo de 15 min)
+      await page.locator('select[id="hora"]').selectOption('10:15');
       
       // Guardar
       await page.click('button[type="submit"]:has-text("Guardar")');
@@ -107,17 +107,23 @@ test.describe('Gestión de Turnos', () => {
     const pacienteOptions = await pacienteSelect.locator('option').count();
     
     if (pacienteOptions > 1) {
-      // Seleccionar paciente y hora
+      // Seleccionar paciente y hora (usar hora con intervalo de 15 min)
       await pacienteSelect.selectOption({ index: 1 });
-      await page.locator('select[id="hora"]').selectOption('14:00');
+      await page.locator('select[id="hora"]').selectOption('14:15');
       await page.click('button[type="submit"]:has-text("Guardar")');
       
       await page.waitForTimeout(1000);
       
       // Intentar crear otro turno en el mismo horario
       await page.click('button:has-text("Nuevo Turno")');
-      await pacienteSelect.selectOption({ index: 1 });
-      await page.locator('select[id="hora"]').selectOption('14:00');
+      await page.waitForTimeout(1000);
+      const pacienteSelect2 = page.locator('select[id="paciente"]');
+      if (pacienteOptions > 2) {
+        await pacienteSelect2.selectOption({ index: 2 });
+      } else {
+        await pacienteSelect2.selectOption({ index: 1 });
+      }
+      await page.locator('select[id="hora"]').selectOption('14:15');
       await page.click('button[type="submit"]:has-text("Guardar")');
       
       // Debería mostrar error

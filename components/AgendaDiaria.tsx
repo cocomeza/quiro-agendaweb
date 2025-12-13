@@ -3,7 +3,7 @@
 import { format, isToday } from 'date-fns';
 import { es } from 'date-fns/locale/es';
 import type { TurnoConPaciente, TurnoConPago, Paciente } from '@/lib/supabase/types';
-import { Calendar, ChevronLeft, ChevronRight, Plus, Printer, Phone, Copy, AlertCircle } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Plus, Printer, Phone, Copy, AlertCircle, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import ResumenDia from './ResumenDia';
@@ -96,13 +96,12 @@ export default function AgendaDiaria({
   }, [turnos, fechaSeleccionada]);
 
   const handleImprimir = () => {
-    // Mostrar selector de fecha si no está visible
+    // Si no hay selector visible, mostrar selector para elegir fecha
     if (!mostrarSelectorFecha) {
       setMostrarSelectorFecha(true);
       return;
     }
-    // Si ya se seleccionó la fecha, imprimir
-    window.print();
+    // Si ya se seleccionó la fecha, la impresión se hace en handleConfirmarFechaImpresion
   };
 
   const handleConfirmarFechaImpresion = async () => {
@@ -111,23 +110,40 @@ export default function AgendaDiaria({
       const fechaStr = format(fechaParaImprimir, 'yyyy-MM-dd');
       const { data: turnosData, error: turnosError } = await supabase
         .from('turnos')
-        .select('*, pacientes(*)')
+        .select(`
+          *,
+          pacientes (
+            id,
+            nombre,
+            apellido,
+            telefono,
+            email,
+            fecha_nacimiento,
+            numero_ficha,
+            direccion,
+            dni
+          )
+        `)
         .eq('fecha', fechaStr)
         .order('hora', { ascending: true });
 
       if (turnosError) throw turnosError;
 
-      const turnosMapeados: TurnoConPaciente[] = (turnosData || []).map((turno: any) => ({
-        ...turno,
-        pacientes: Array.isArray(turno.pacientes) ? turno.pacientes[0] : turno.pacientes,
-      }));
+      // Mapear correctamente los datos de pacientes
+      const turnosMapeados: TurnoConPaciente[] = (turnosData || []).map((turno: any) => {
+        const paciente = Array.isArray(turno.pacientes) ? turno.pacientes[0] : turno.pacientes;
+        return {
+          ...turno,
+          pacientes: paciente || null,
+        };
+      }).filter((turno: TurnoConPaciente) => turno.pacientes !== null);
 
       setTurnosParaImprimir(turnosMapeados);
       setMostrarSelectorFecha(false);
       // Pequeño delay para que se actualice el estado antes de imprimir
       setTimeout(() => {
         window.print();
-      }, 100);
+      }, 200);
     } catch (error) {
       console.error('Error al cargar turnos para imprimir:', error);
       showError('❌ Error al cargar turnos de la fecha seleccionada');
@@ -142,159 +158,236 @@ export default function AgendaDiaria({
       <VistaImpresionTurnos turnos={turnosParaImprimir} fecha={fechaParaImprimir} />
       
       {/* Vista normal (oculta al imprimir) */}
-      <div className="bg-white rounded-lg shadow no-print">
-      {/* Resumen del día */}
-      <div className="px-4 sm:px-6 pt-4 sm:pt-6">
-        <ResumenDia turnos={turnos} fecha={fechaSeleccionada} />
-      </div>
-
-      {/* Búsqueda rápida */}
-      <div className="px-4 sm:px-6 pb-4">
-        <BusquedaRapida
-          pacientes={pacientes}
-          onSeleccionarPaciente={(paciente) => {
-            // Buscar turnos del paciente en la fecha seleccionada
-            const turnoPaciente = turnos.find(t => t.paciente_id === paciente.id);
-            if (turnoPaciente) {
-              onAbrirModalTurno(turnoPaciente);
-            } else {
-              // Si no tiene turno, abrir modal para crear uno
-              onAbrirModalTurno();
-            }
-          }}
-        />
-      </div>
-
-      {/* Controles de fecha */}
-      <div className="border-b px-4 sm:px-6 py-4">
-        <div className="flex items-center justify-between mb-3 sm:mb-0">
-          <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-            <button
-              onClick={() => onCambiarFecha(-1)}
-              className="p-2 hover:bg-gray-100 rounded-md transition flex-shrink-0"
-              aria-label="Día anterior"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <Calendar className="w-5 h-5 text-gray-500 flex-shrink-0" />
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
-                {format(fechaSeleccionada, "EEEE, d 'de' MMMM", { locale: es })}
-              </h2>
-              {isToday(fechaSeleccionada) && (
-                <span className="px-2 py-1 text-xs font-medium bg-indigo-100 text-indigo-800 rounded flex-shrink-0">
-                  Hoy
-                </span>
-              )}
+      <div className="bg-white rounded-lg shadow-lg no-print">
+        {/* Header con resumen y controles */}
+        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-indigo-200 px-4 sm:px-6 py-5">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+            {/* Título y fecha */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-indigo-600 rounded-lg">
+                  <Calendar className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
+                    {format(fechaSeleccionada, "EEEE, d 'de' MMMM", { locale: es })}
+                  </h2>
+                  {isToday(fechaSeleccionada) && (
+                    <span className="inline-block mt-1 px-2.5 py-0.5 text-xs font-semibold bg-indigo-600 text-white rounded-full">
+                      Hoy
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-            <button
-              onClick={() => onCambiarFecha(1)}
-              className="p-2 hover:bg-gray-100 rounded-md transition flex-shrink-0"
-              aria-label="Día siguiente"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-          <button
-            onClick={() => onCambiarFecha(0)}
-            className="ml-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition flex-shrink-0"
-          >
-            Hoy
-          </button>
-        </div>
-      </div>
 
-      {/* Botones de acción */}
-      <div className="px-4 sm:px-6 py-4 border-b">
-        {mostrarSelectorFecha && (
-          <div className="mb-4 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Seleccionar fecha para imprimir:
-            </label>
-            <div className="flex gap-2 items-center">
-              <input
-                type="date"
-                value={format(fechaParaImprimir, 'yyyy-MM-dd')}
-                onChange={(e) => {
-                  const nuevaFecha = new Date(e.target.value);
-                  setFechaParaImprimir(nuevaFecha);
+            {/* Navegación de fecha */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onCambiarFecha(-1)}
+                className="p-2.5 hover:bg-white hover:shadow-md rounded-lg transition-all"
+                aria-label="Día anterior"
+                title="Día anterior"
+              >
+                <ChevronLeft className="w-5 h-5 text-gray-700" />
+              </button>
+              <button
+                onClick={() => onCambiarFecha(0)}
+                className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition-all shadow-sm"
+                title="Ir a hoy"
+              >
+                Hoy
+              </button>
+              <button
+                onClick={() => onCambiarFecha(1)}
+                className="p-2.5 hover:bg-white hover:shadow-md rounded-lg transition-all"
+                aria-label="Día siguiente"
+                title="Día siguiente"
+              >
+                <ChevronRight className="w-5 h-5 text-gray-700" />
+              </button>
+            </div>
+          </div>
+
+          {/* Resumen del día compacto */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-600 font-medium">Total</p>
+                  <p className="text-2xl font-bold text-gray-900">{turnos.length}</p>
+                </div>
+                <Calendar className="w-8 h-8 text-blue-500 opacity-60" />
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-600 font-medium">Completados</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {turnos.filter(t => t.estado === 'completado').length}
+                  </p>
+                </div>
+                <CheckCircle className="w-8 h-8 text-green-500 opacity-60" />
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-600 font-medium">Pendientes</p>
+                  <p className="text-2xl font-bold text-yellow-600">
+                    {turnos.filter(t => t.estado === 'programado').length}
+                  </p>
+                </div>
+                <Clock className="w-8 h-8 text-yellow-500 opacity-60" />
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-600 font-medium">Cancelados</p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {turnos.filter(t => t.estado === 'cancelado').length}
+                  </p>
+                </div>
+                <XCircle className="w-8 h-8 text-red-500 opacity-60" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Búsqueda rápida y acciones */}
+        <div className="px-4 sm:px-6 py-4 border-b bg-gray-50">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1">
+              <BusquedaRapida
+                pacientes={pacientes}
+                onSeleccionarPaciente={(paciente) => {
+                  const turnoPaciente = turnos.find(t => t.paciente_id === paciente.id);
+                  if (turnoPaciente) {
+                    onAbrirModalTurno(turnoPaciente);
+                  } else {
+                    onAbrirModalTurno();
+                  }
                 }}
-                // Permitir seleccionar cualquier fecha (pasado o futuro)
-                className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 text-sm font-medium"
               />
+            </div>
+            <div className="flex gap-2">
               <button
-                onClick={handleConfirmarFechaImpresion}
-                disabled={cargandoTurnosImpresion}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleImprimir}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm font-semibold shadow-sm"
+                title="Imprimir agenda"
+                aria-label="Imprimir agenda del día"
               >
-                {cargandoTurnosImpresion ? 'Cargando...' : 'Imprimir'}
+                <Printer className="w-4 h-4" />
+                <span className="hidden sm:inline">Imprimir</span>
               </button>
               <button
-                onClick={() => {
-                  setMostrarSelectorFecha(false);
-                  setFechaParaImprimir(fechaSeleccionada);
-                }}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition text-sm font-semibold"
+                onClick={() => onAbrirModalTurno()}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold shadow-md hover:shadow-lg"
+                aria-label="Crear nuevo turno"
               >
-                Cancelar
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">Nuevo Turno</span>
+                <span className="sm:hidden">Nuevo</span>
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Selector de fecha para imprimir */}
+        {mostrarSelectorFecha && (
+          <div className="px-4 sm:px-6 py-4 border-b bg-yellow-50 border-yellow-200">
+            <div className="p-4 bg-white border-2 border-indigo-200 rounded-lg shadow-sm">
+              <label className="block text-sm font-bold text-gray-900 mb-3">
+                📅 Seleccionar fecha para imprimir:
+              </label>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="date"
+                  value={format(fechaParaImprimir, 'yyyy-MM-dd')}
+                  onChange={(e) => {
+                    const nuevaFecha = new Date(e.target.value);
+                    setFechaParaImprimir(nuevaFecha);
+                  }}
+                  className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 text-sm font-medium"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleConfirmarFechaImpresion}
+                    disabled={cargandoTurnosImpresion}
+                    className="px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                  >
+                    {cargandoTurnosImpresion ? 'Cargando...' : 'Imprimir'}
+                  </button>
+                  <button
+                    onClick={async () => {
+                      setFechaParaImprimir(fechaSeleccionada);
+                      setTurnosParaImprimir(turnos);
+                      setMostrarSelectorFecha(false);
+                    }}
+                    className="px-4 py-2.5 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition text-sm font-semibold"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const turnosConPacientes = turnos.filter(t => t.pacientes && t.pacientes.nombre);
+                      setFechaParaImprimir(fechaSeleccionada);
+                      setTurnosParaImprimir(turnosConPacientes);
+                      setMostrarSelectorFecha(false);
+                      setTimeout(() => {
+                        window.print();
+                      }, 100);
+                    }}
+                    className="px-4 py-2.5 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition text-sm font-semibold"
+                  >
+                    Día actual
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
-        <div className="flex gap-2">
-          <button
-            onClick={handleImprimir}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition text-sm font-semibold shadow-sm"
-            title="Imprimir agenda"
-            aria-label="Imprimir agenda del día"
-          >
-            <Printer className="w-4 h-4" />
-            <span className="hidden sm:inline">Imprimir</span>
-          </button>
-          <button
-            onClick={() => onAbrirModalTurno()}
-            className="flex items-center justify-center gap-2 flex-1 sm:flex-initial px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold shadow-md"
-            aria-label="Crear nuevo turno"
-          >
-            <Plus className="w-4 h-4" />
-            Nuevo Turno
-          </button>
-        </div>
-      </div>
 
-      {/* Agenda */}
-      <div className="overflow-y-auto max-h-[calc(100vh-250px)] sm:max-h-[calc(100vh-300px)]">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center p-8">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mb-4"></div>
-            <p className="text-gray-600 text-base">Cargando agenda...</p>
-          </div>
-        ) : turnos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-8">
-            <p className="text-gray-700 text-base font-medium">No hay turnos programados para este día</p>
-            <button
-              onClick={() => onAbrirModalTurno()}
-              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-sm font-medium"
-            >
-              Crear primer turno
-            </button>
-          </div>
-        ) : (
-          <div className="divide-y">
+        {/* Agenda de turnos */}
+        <div className="overflow-y-auto max-h-[calc(100vh-400px)] sm:max-h-[calc(100vh-450px)]">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center p-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+              <p className="text-gray-600 text-base font-medium">Cargando agenda...</p>
+            </div>
+          ) : turnos.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-12">
+              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <Calendar className="w-10 h-10 text-gray-400" />
+              </div>
+              <p className="text-gray-700 text-lg font-semibold mb-2">No hay turnos programados</p>
+              <p className="text-gray-500 text-sm mb-6">Comienza agregando un turno para este día</p>
+              <button
+                onClick={() => onAbrirModalTurno()}
+                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold shadow-md hover:shadow-lg"
+              >
+                <Plus className="w-4 h-4 inline mr-2" />
+                Crear primer turno
+              </button>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200">
             {FRANJAS_HORARIAS.map((hora) => {
               const turno = turnosPorHora[hora];
               return (
                 <div
                   key={hora}
-                  className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 hover:bg-gray-50 transition cursor-pointer"
+                  className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-indigo-50/50 transition-all cursor-pointer group"
                   onClick={() => turno ? onAbrirModalTurno(turno) : onAbrirModalTurno()}
                 >
-                  <div className="flex items-start sm:items-center gap-2 sm:gap-3 lg:gap-4">
-                    <div className="w-14 sm:w-16 lg:w-20 text-xs sm:text-sm font-medium text-gray-700 flex-shrink-0 pt-1 sm:pt-0">
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 sm:w-20 text-sm sm:text-base font-bold text-gray-600 flex-shrink-0 pt-1 group-hover:text-indigo-600 transition-colors">
                       {hora}
                     </div>
                     {turno ? (
-                      <div className={`flex-1 px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-md border ${
+                      <div className={`flex-1 px-4 py-3 rounded-lg border-2 shadow-sm transition-all group-hover:shadow-md ${
                         esTurnoAtrasado(turno.fecha, turno.hora, turno.estado)
                           ? 'border-red-500 bg-red-50'
                           : esTurnoProximo(turno.fecha, turno.hora)
@@ -393,8 +486,8 @@ export default function AgendaDiaria({
                         </div>
                       </div>
                     ) : (
-                      <div className="flex-1 text-sm sm:text-base text-gray-500 font-medium">
-                        Disponible
+                      <div className="flex-1 px-4 py-3 text-sm sm:text-base text-gray-400 font-medium border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-300 hover:text-indigo-500 transition-colors">
+                        Disponible - Click para agregar turno
                       </div>
                     )}
                   </div>

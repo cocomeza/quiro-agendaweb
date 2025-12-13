@@ -19,7 +19,10 @@ export default function VistaImpresionTurnos({ turnos, fecha }: VistaImpresionTu
   }, []);
 
   // Filtrar solo turnos programados y completados (no cancelados)
-  const turnosParaImprimir = turnos.filter(t => t.estado !== 'cancelado');
+  // y verificar que tengan datos del paciente
+  const turnosParaImprimir = turnos.filter(t => {
+    return t.estado !== 'cancelado' && t.pacientes && t.pacientes.nombre;
+  });
   
   // Ordenar por hora
   const turnosOrdenados = [...turnosParaImprimir].sort((a, b) => {
@@ -83,18 +86,18 @@ export default function VistaImpresionTurnos({ turnos, fecha }: VistaImpresionTu
                       {turno.hora}
                     </td>
                     <td className="py-3 px-4 text-gray-900 text-base font-medium">
-                      {turno.pacientes.numero_ficha || '-'}
+                      {turno.pacientes?.numero_ficha || '-'}
                     </td>
                     <td className="py-3 px-4 text-gray-900 text-base">
                       <div className="font-medium">
-                        {turno.pacientes.apellido}, {turno.pacientes.nombre}
+                        {turno.pacientes?.apellido || ''}, {turno.pacientes?.nombre || 'Sin nombre'}
                       </div>
                       {edad !== null && (
                         <div className="text-sm text-gray-600">Edad: {edad} años</div>
                       )}
                     </td>
                     <td className="py-3 px-4 text-gray-700 text-base">
-                      {turno.pacientes.telefono || '-'}
+                      {turno.pacientes?.telefono || '-'}
                     </td>
                     <td className="py-3 px-4 text-base">
                       <span className={`font-medium ${

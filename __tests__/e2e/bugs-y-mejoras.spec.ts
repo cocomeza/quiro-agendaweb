@@ -56,7 +56,7 @@ test.describe('🐛 Detección de Bugs y Mejoras', () => {
         const horaActual = await horaSelect.inputValue();
         
         // Cambiar a otra hora que ya existe
-        const todasLasHoras = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30'];
+        const todasLasHoras = ['08:00', '08:15', '08:30', '09:00', '09:15', '10:00'];
         const otraHora = todasLasHoras.find(h => h !== horaActual);
         
         if (otraHora) {

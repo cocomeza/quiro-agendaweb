@@ -276,6 +276,14 @@ export default function AgendaPage() {
             loading={loading}
             onAbrirModalPaciente={abrirModalPaciente}
             onAbrirFichaMedica={abrirFichaMedica}
+            onEliminarTurno={async (turnoId) => {
+              const { error } = await supabase
+                .from('turnos')
+                .delete()
+                .eq('id', turnoId);
+              if (error) throw error;
+              cargarDatos();
+            }}
           />
         ) : (
           <SeguimientoPacientes />
@@ -289,6 +297,8 @@ export default function AgendaPage() {
           pacientes={pacientes}
           fecha={fechaSeleccionada}
           onClose={cerrarModalTurno}
+          onAbrirModalPaciente={abrirModalPaciente}
+          onAbrirFichaMedica={abrirFichaMedica}
         />
       )}
 

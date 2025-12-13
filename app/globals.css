@@ -72,12 +72,15 @@ input, select, textarea {
   .print-agenda,
   .print-agenda *,
   .print-lista-pacientes,
-  .print-lista-pacientes * {
+  .print-lista-pacientes *,
+  .print-ficha-medica,
+  .print-ficha-medica * {
     visibility: visible;
   }
   
   .print-agenda,
-  .print-lista-pacientes {
+  .print-lista-pacientes,
+  .print-ficha-medica {
     position: absolute;
     left: 0;
     top: 0;
@@ -124,9 +127,23 @@ input, select, textarea {
 
   /* Asegurar que los colores se impriman */
   .print-agenda,
-  .print-lista-pacientes {
+  .print-lista-pacientes,
+  .print-ficha-medica {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+
+  /* Estilos específicos para ficha médica */
+  .print-ficha-medica h1,
+  .print-ficha-medica h2,
+  .print-ficha-medica h3 {
+    color: #111827 !important;
+    font-weight: bold;
+  }
+
+  .print-ficha-medica p {
+    color: #374151 !important;
+    line-height: 1.6;
   }
 }
 

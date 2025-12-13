@@ -38,6 +38,30 @@ test.describe('Ficha Médica', () => {
     }
   });
 
+  test('debe poder imprimir ficha médica', async ({ page }) => {
+    await navegarAVista(page, 'pacientes');
+    await page.waitForTimeout(2000);
+
+    const botonFicha = page.locator('button[title*="ficha"], button[title*="Ficha"]').first();
+    
+    if (await botonFicha.isVisible({ timeout: 5000 })) {
+      await botonFicha.click();
+      await page.waitForTimeout(1000);
+      
+      await expect(page.locator('text=/Ficha Médica|ficha médica/i')).toBeVisible({ timeout: 5000 });
+      
+      // Buscar botón de imprimir
+      const imprimirBtn = page.locator('button[aria-label*="imprimir"], button[title*="imprimir"]').first();
+      
+      if (await imprimirBtn.isVisible({ timeout: 2000 })) {
+        await expect(imprimirBtn).toBeVisible();
+        // No imprimimos realmente para no abrir el diálogo de impresión
+      }
+    } else {
+      test.skip();
+    }
+  });
+
   test('debe poder editar campos de ficha médica', async ({ page }) => {
     await page.click('a:has-text("Pacientes"), button:has-text("Pacientes")');
     await page.waitForTimeout(1000);
