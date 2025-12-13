@@ -137,9 +137,15 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
     if (!paciente) return;
     
     const confirmacion = window.confirm(
-      `¿Estás seguro de que deseas eliminar a ${paciente.nombre} ${paciente.apellido}?\n\n` +
-      '⚠️ ADVERTENCIA: Esto también eliminará TODOS los turnos asociados a este paciente.\n\n' +
-      'Esta acción NO se puede deshacer.'
+      `¿Estás seguro de que deseas eliminar a ${paciente.nombre} ${paciente.apellido} de la base de datos?\n\n` +
+      '⚠️ ADVERTENCIA: Esto eliminará permanentemente:\n' +
+      '• El paciente de la base de datos\n' +
+      '• TODOS los turnos asociados a este paciente\n\n' +
+      'Esta acción NO se puede deshacer.\n\n' +
+      'Use esta opción solo si el paciente:\n' +
+      '• Falleció\n' +
+      '• Se mudó de ciudad\n' +
+      '• Cambió de médico'
     );
     
     if (!confirmacion) {
