@@ -19,9 +19,16 @@ export default function VistaImpresionTurnos({ turnos, fecha }: VistaImpresionTu
   }, []);
 
   // Filtrar solo turnos programados y completados (no cancelados)
-  // y verificar que tengan datos del paciente
+  // y verificar que tengan datos completos del paciente (nombre, apellido, numero_ficha, telefono)
   const turnosParaImprimir = turnos.filter(t => {
-    return t.estado !== 'cancelado' && t.pacientes && t.pacientes.nombre;
+    return (
+      t.estado !== 'cancelado' && 
+      t.pacientes && 
+      t.pacientes.nombre && 
+      t.pacientes.apellido &&
+      t.pacientes.numero_ficha &&
+      t.pacientes.telefono
+    );
   });
   
   // Ordenar por hora
@@ -65,9 +72,14 @@ export default function VistaImpresionTurnos({ turnos, fecha }: VistaImpresionTu
             </thead>
             <tbody>
               {turnosOrdenados.map((turno, index) => {
+                // Verificar que el turno tenga datos completos del paciente
+                if (!turno.pacientes || !turno.pacientes.nombre || !turno.pacientes.apellido) {
+                  return null;
+                }
+
                 // Calcular edad si tiene fecha de nacimiento
                 let edad = null;
-                if (turno.pacientes.fecha_nacimiento) {
+                if (turno.pacientes?.fecha_nacimiento) {
                   const hoy = new Date();
                   const nacimiento = new Date(turno.pacientes.fecha_nacimiento);
                   edad = hoy.getFullYear() - nacimiento.getFullYear();
@@ -85,19 +97,19 @@ export default function VistaImpresionTurnos({ turnos, fecha }: VistaImpresionTu
                     <td className="py-3 px-4 font-medium text-gray-900 text-base">
                       {turno.hora}
                     </td>
-                    <td className="py-3 px-4 text-gray-900 text-base font-medium">
-                      {turno.pacientes?.numero_ficha || '-'}
+                    <td className="py-3 px-4 text-gray-900 text-base font-bold">
+                      {turno.pacientes.numero_ficha || '-'}
                     </td>
                     <td className="py-3 px-4 text-gray-900 text-base">
-                      <div className="font-medium">
-                        {turno.pacientes?.apellido || ''}, {turno.pacientes?.nombre || 'Sin nombre'}
+                      <div className="font-bold text-lg">
+                        {turno.pacientes.apellido}, {turno.pacientes.nombre}
                       </div>
                       {edad !== null && (
                         <div className="text-sm text-gray-600">Edad: {edad} años</div>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-gray-700 text-base">
-                      {turno.pacientes?.telefono || '-'}
+                    <td className="py-3 px-4 text-gray-900 text-base font-bold">
+                      {turno.pacientes.telefono || '-'}
                     </td>
                     <td className="py-3 px-4 text-base">
                       <span className={`font-medium ${

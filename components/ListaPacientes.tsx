@@ -100,12 +100,21 @@ export default function ListaPacientes({
 
   const pacientesFiltrados = pacientes.filter((paciente) => {
     if (!busqueda.trim()) return true;
-    const termino = busqueda.toLowerCase();
+    const termino = busqueda.toLowerCase().trim();
+    
+    // Para número de ficha: buscar coincidencia exacta
+    // Si el término es numérico, buscar coincidencia exacta del número de ficha
+    const esNumero = /^\d+$/.test(termino);
+    const coincideNumeroFicha = paciente.numero_ficha && (
+      paciente.numero_ficha.toLowerCase() === termino ||
+      (esNumero && paciente.numero_ficha.toLowerCase() === termino)
+    );
+    
     return (
       paciente.nombre.toLowerCase().includes(termino) ||
       paciente.apellido.toLowerCase().includes(termino) ||
       (paciente.email && paciente.email.toLowerCase().includes(termino)) ||
-      (paciente.numero_ficha && paciente.numero_ficha.toLowerCase().includes(termino))
+      coincideNumeroFicha
     );
   });
 
