@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale/es';
-import { copiarAlPortapapeles, formatearTelefono, esTurnoProximo, esTurnoAtrasado } from '@/lib/utils';
+import { copiarAlPortapapeles, formatearTelefono, esTurnoProximo, esTurnoAtrasado, FRANJAS_HORARIAS, generarFranjasHorarias } from '@/lib/utils';
 
 describe('Utilidades de fecha', () => {
   it('debe formatear fecha correctamente', () => {
@@ -19,28 +19,20 @@ describe('Utilidades de fecha', () => {
 });
 
 describe('Franjas horarias', () => {
-  const FRANJAS_HORARIAS = [
-    '08:00', '08:15', '08:30', '08:45', '09:00', '09:15', '09:30', '09:45',
-    '10:00', '10:15', '10:30', '10:45', '11:00', '11:15', '11:30', '11:45',
-    '12:00', '12:15', '12:30', '12:45', '13:00', '13:15', '13:30', '13:45',
-    '14:00', '14:15', '14:30', '14:45', '15:00', '15:15', '15:30', '15:45',
-    '16:00', '16:15', '16:30', '16:45', '17:00', '17:15', '17:30', '17:45',
-    '18:00', '18:15', '18:30', '18:45', '19:00', '19:15', '19:30', '19:45',
-  ];
-
-  it('debe tener 48 franjas horarias', () => {
-    expect(FRANJAS_HORARIAS).toHaveLength(48);
+  it('debe generar franjas horarias correctamente', () => {
+    const franjas = generarFranjasHorarias();
+    expect(franjas.length).toBeGreaterThan(0);
   });
 
-  it('debe empezar a las 08:00', () => {
-    expect(FRANJAS_HORARIAS[0]).toBe('08:00');
+  it('debe empezar a las 09:00', () => {
+    expect(FRANJAS_HORARIAS[0]).toBe('09:00');
   });
 
-  it('debe terminar a las 19:45', () => {
-    expect(FRANJAS_HORARIAS[FRANJAS_HORARIAS.length - 1]).toBe('19:45');
+  it('debe terminar a las 20:00', () => {
+    expect(FRANJAS_HORARIAS[FRANJAS_HORARIAS.length - 1]).toBe('20:00');
   });
 
-  it('debe tener intervalos de 15 minutos', () => {
+  it('debe tener intervalos de 5 minutos', () => {
     for (let i = 0; i < FRANJAS_HORARIAS.length - 1; i++) {
       const [hora1, minuto1] = FRANJAS_HORARIAS[i].split(':').map(Number);
       const [hora2, minuto2] = FRANJAS_HORARIAS[i + 1].split(':').map(Number);
@@ -48,8 +40,13 @@ describe('Franjas horarias', () => {
       const minutos1 = hora1 * 60 + minuto1;
       const minutos2 = hora2 * 60 + minuto2;
       
-      expect(minutos2 - minutos1).toBe(15);
+      expect(minutos2 - minutos1).toBe(5);
     }
+  });
+
+  it('debe tener 133 franjas horarias (de 09:00 a 20:00 con intervalos de 5 min)', () => {
+    // De 09:00 a 19:55 = 11 horas * 12 intervalos por hora = 132 franjas + 20:00 = 133 franjas
+    expect(FRANJAS_HORARIAS).toHaveLength(133);
   });
 });
 

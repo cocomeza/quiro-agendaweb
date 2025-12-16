@@ -3,8 +3,8 @@ import "./globals.css";
 import ToastProvider from "@/components/ToastProvider";
 
 export const metadata: Metadata = {
-  title: "Gestión de Turnos - Consultorio Quiropráctico",
-  description: "Sistema de gestión de turnos para consultorio quiropráctico",
+  title: "Gestión de Turnos - QUIROPRAXIA RAMALLO",
+  description: "Sistema de gestión de turnos para quiropraxia",
 };
 
 export default function RootLayout({

@@ -78,3 +78,36 @@ export function esTurnoAtrasado(fecha: string, hora: string, estado: string): bo
   return fechaTurno.getTime() < ahora.getTime();
 }
 
+/**
+ * Genera franjas horarias con intervalos de 5 minutos
+ * Desde las 09:00 hasta las 20:00 (8pm) inclusive
+ * Solo lunes a viernes
+ */
+export function generarFranjasHorarias(): string[] {
+  const franjas: string[] = [];
+  const horaInicio = 9; // 9am
+  const horaFin = 20; // 8pm (20:00)
+  
+  for (let hora = horaInicio; hora <= horaFin; hora++) {
+    // Para la última hora (20:00), solo agregar 20:00
+    if (hora === horaFin) {
+      franjas.push('20:00');
+      break;
+    }
+    
+    // Para las demás horas, agregar intervalos de 5 minutos
+    for (let minuto = 0; minuto < 60; minuto += 5) {
+      const horaStr = hora.toString().padStart(2, '0');
+      const minutoStr = minuto.toString().padStart(2, '0');
+      franjas.push(`${horaStr}:${minutoStr}`);
+    }
+  }
+  
+  return franjas;
+}
+
+/**
+ * Constante con las franjas horarias de 5 minutos (09:00 - 20:00)
+ */
+export const FRANJAS_HORARIAS = generarFranjasHorarias();
+
