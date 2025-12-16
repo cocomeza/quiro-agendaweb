@@ -4,7 +4,7 @@ import { format, isToday } from 'date-fns';
 import { es } from 'date-fns/locale/es';
 import type { TurnoConPaciente, TurnoConPago, Paciente } from '@/lib/supabase/types';
 import { Calendar, ChevronLeft, ChevronRight, Plus, Phone, Copy, AlertCircle, CheckCircle, Clock, XCircle, Download } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import ResumenDia from './ResumenDia';
 import BusquedaRapida from './BusquedaRapida';
@@ -81,26 +81,89 @@ export default function AgendaDiaria({
   };
 
   const supabase = createClient();
+  const [mostrarSelectorFechaPDF, setMostrarSelectorFechaPDF] = useState(false);
+  const [fechaParaPDF, setFechaParaPDF] = useState(fechaSeleccionada);
+  const [cargandoPDF, setCargandoPDF] = useState(false);
 
-  const handleDescargarPDF = () => {
+  const handleDescargarPDF = async () => {
+    // Si no hay selector visible, descargar directamente el día actual
+    if (!mostrarSelectorFechaPDF) {
+      try {
+        const turnosParaPDF = turnos.filter(t => 
+          t.pacientes && 
+          t.pacientes.nombre && 
+          t.pacientes.apellido
+        );
+        
+        if (turnosParaPDF.length === 0) {
+          showError('❌ No hay turnos para descargar en este día');
+          return;
+        }
+
+        generarPDFTurnos(turnosParaPDF, fechaSeleccionada);
+        showSuccess('✅ PDF descargado exitosamente');
+      } catch (error) {
+        console.error('Error al generar PDF:', error);
+        showError('❌ Error al generar el PDF');
+      }
+      return;
+    }
+    // Si ya se seleccionó la fecha, descargar en handleDescargarPDFFecha
+  };
+
+  const handleDescargarPDFOtraFecha = () => {
+    // Mostrar selector para elegir otra fecha
+    setMostrarSelectorFechaPDF(true);
+  };
+
+  const handleDescargarPDFFecha = async () => {
+    setCargandoPDF(true);
     try {
-      // Usar los turnos actuales del día seleccionado
-      const turnosParaPDF = turnos.filter(t => 
-        t.pacientes && 
-        t.pacientes.nombre && 
-        t.pacientes.apellido
-      );
-      
-      if (turnosParaPDF.length === 0) {
-        showError('❌ No hay turnos para descargar en este día');
+      const fechaStr = format(fechaParaPDF, 'yyyy-MM-dd');
+      const { data: turnosData, error: turnosError } = await supabase
+        .from('turnos')
+        .select(`
+          *,
+          pacientes (
+            id,
+            nombre,
+            apellido,
+            telefono,
+            email,
+            fecha_nacimiento,
+            numero_ficha,
+            direccion,
+            dni
+          )
+        `)
+        .eq('fecha', fechaStr)
+        .order('hora', { ascending: true });
+
+      if (turnosError) throw turnosError;
+
+      // Mapear correctamente los datos de pacientes
+      const turnosMapeados: TurnoConPaciente[] = (turnosData || []).map((turno: any) => {
+        const paciente = Array.isArray(turno.pacientes) ? turno.pacientes[0] : turno.pacientes;
+        return {
+          ...turno,
+          pacientes: paciente || null,
+        };
+      }).filter((turno: TurnoConPaciente) => turno.pacientes !== null);
+
+      if (turnosMapeados.length === 0) {
+        showError('❌ No hay turnos para descargar en la fecha seleccionada');
+        setMostrarSelectorFechaPDF(false);
         return;
       }
 
-      generarPDFTurnos(turnosParaPDF, fechaSeleccionada);
+      generarPDFTurnos(turnosMapeados, fechaParaPDF);
       showSuccess('✅ PDF descargado exitosamente');
+      setMostrarSelectorFechaPDF(false);
     } catch (error) {
-      console.error('Error al generar PDF:', error);
-      showError('❌ Error al generar el PDF');
+      console.error('Error al cargar turnos para PDF:', error);
+      showError('❌ Error al cargar turnos de la fecha seleccionada');
+    } finally {
+      setCargandoPDF(false);
     }
   };
 
@@ -224,12 +287,21 @@ export default function AgendaDiaria({
               <button
                 onClick={handleDescargarPDF}
                 className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-semibold shadow-sm"
-                title="Descargar lista en PDF"
+                title="Descargar lista en PDF del día actual"
                 aria-label="Descargar lista de turnos en PDF"
               >
                 <Download className="w-4 h-4" />
                 <span className="hidden sm:inline">Descargar PDF</span>
                 <span className="sm:hidden">PDF</span>
+              </button>
+              <button
+                onClick={handleDescargarPDFOtraFecha}
+                className="flex items-center justify-center gap-2 px-3 py-2.5 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition text-xs font-semibold shadow-sm border border-green-200"
+                title="Descargar PDF de otra fecha"
+                aria-label="Seleccionar otra fecha para descargar PDF"
+              >
+                <Calendar className="w-3 h-3" />
+                <span className="hidden lg:inline">Otra fecha</span>
               </button>
               <button
                 onClick={() => onAbrirModalTurno()}
@@ -244,6 +316,53 @@ export default function AgendaDiaria({
           </div>
         </div>
 
+        {/* Selector de fecha para descargar PDF */}
+        {mostrarSelectorFechaPDF && (
+          <div className="px-4 sm:px-6 py-4 border-b bg-green-50 border-green-200">
+            <div className="p-4 bg-white border-2 border-green-200 rounded-lg shadow-sm">
+              <label className="block text-sm font-bold text-gray-900 mb-3">
+                📅 Seleccionar fecha para descargar PDF:
+              </label>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="date"
+                  value={format(fechaParaPDF, 'yyyy-MM-dd')}
+                  onChange={(e) => {
+                    try {
+                      if (e.target.value) {
+                        const nuevaFecha = new Date(e.target.value + 'T00:00:00');
+                        if (!isNaN(nuevaFecha.getTime())) {
+                          setFechaParaPDF(nuevaFecha);
+                        }
+                      }
+                    } catch (error) {
+                      console.error('Error al cambiar fecha:', error);
+                    }
+                  }}
+                  className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-600 text-sm font-medium"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleDescargarPDFFecha}
+                    disabled={cargandoPDF}
+                    className="px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                  >
+                    {cargandoPDF ? 'Cargando...' : 'Descargar'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFechaParaPDF(fechaSeleccionada);
+                      setMostrarSelectorFechaPDF(false);
+                    }}
+                    className="px-4 py-2.5 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition text-sm font-semibold"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Agenda de turnos */}
         <div className="overflow-y-auto max-h-[calc(100vh-400px)] sm:max-h-[calc(100vh-450px)]">
@@ -405,13 +524,12 @@ export default function AgendaDiaria({
           </div>
         )}
       </div>
-      </div>
 
       {/* Lista de pacientes con turno del día */}
       <div className="mt-6">
         <ListaPacientesDia turnos={turnos} fecha={fechaSeleccionada} />
       </div>
-    </>
+    </div>
   );
 }
 
