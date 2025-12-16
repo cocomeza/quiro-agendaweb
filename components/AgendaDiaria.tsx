@@ -3,12 +3,11 @@
 import { format, isToday } from 'date-fns';
 import { es } from 'date-fns/locale/es';
 import type { TurnoConPaciente, TurnoConPago, Paciente } from '@/lib/supabase/types';
-import { Calendar, ChevronLeft, ChevronRight, Plus, Printer, Phone, Copy, AlertCircle, CheckCircle, Clock, XCircle, Download } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Plus, Phone, Copy, AlertCircle, CheckCircle, Clock, XCircle, Download } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import ResumenDia from './ResumenDia';
 import BusquedaRapida from './BusquedaRapida';
-import VistaImpresionTurnos from './VistaImpresionTurnos';
 import ListaPacientesDia from './ListaPacientesDia';
 import { copiarAlPortapapeles, esTurnoProximo, esTurnoAtrasado, FRANJAS_HORARIAS } from '@/lib/utils';
 import { showSuccess, showError } from '@/lib/toast';
@@ -81,52 +80,7 @@ export default function AgendaDiaria({
     }
   };
 
-  const [mostrarSelectorFecha, setMostrarSelectorFecha] = useState(false);
-  const [fechaParaImprimir, setFechaParaImprimir] = useState(fechaSeleccionada);
-  // Inicializar con turnos que tengan datos completos del paciente
-  const [turnosParaImprimir, setTurnosParaImprimir] = useState<TurnoConPaciente[]>(
-    turnos.filter(t => t.pacientes && t.pacientes.nombre && t.pacientes.apellido)
-  );
-  const [cargandoTurnosImpresion, setCargandoTurnosImpresion] = useState(false);
   const supabase = createClient();
-
-  // Actualizar turnos para imprimir cuando cambia la fecha seleccionada
-  // Asegurar que los turnos tengan datos completos del paciente
-  useEffect(() => {
-    // Filtrar solo turnos con datos completos del paciente
-    const turnosConDatosCompletos = turnos.filter(t => 
-      t.pacientes && 
-      t.pacientes.nombre && 
-      t.pacientes.apellido
-    );
-    setTurnosParaImprimir(turnosConDatosCompletos);
-    setFechaParaImprimir(fechaSeleccionada);
-  }, [turnos, fechaSeleccionada]);
-
-  const handleImprimir = () => {
-    // Si no hay selector visible, usar directamente los turnos del día actual
-    if (!mostrarSelectorFecha) {
-      // Asegurar que los turnos estén actualizados
-      const turnosConDatosCompletos = turnos.filter(t => 
-        t.pacientes && 
-        t.pacientes.nombre && 
-        t.pacientes.apellido
-      );
-      setTurnosParaImprimir(turnosConDatosCompletos);
-      setFechaParaImprimir(fechaSeleccionada);
-      // Pequeño delay para que se actualice el estado antes de imprimir
-      setTimeout(() => {
-        window.print();
-      }, 200);
-      return;
-    }
-    // Si ya se seleccionó la fecha, la impresión se hace en handleConfirmarFechaImpresion
-  };
-
-  const handleImprimirOtraFecha = () => {
-    // Mostrar selector para elegir otra fecha
-    setMostrarSelectorFecha(true);
-  };
 
   const handleDescargarPDF = () => {
     try {
@@ -150,61 +104,9 @@ export default function AgendaDiaria({
     }
   };
 
-  const handleConfirmarFechaImpresion = async () => {
-    setCargandoTurnosImpresion(true);
-    try {
-      const fechaStr = format(fechaParaImprimir, 'yyyy-MM-dd');
-      const { data: turnosData, error: turnosError } = await supabase
-        .from('turnos')
-        .select(`
-          *,
-          pacientes (
-            id,
-            nombre,
-            apellido,
-            telefono,
-            email,
-            fecha_nacimiento,
-            numero_ficha,
-            direccion,
-            dni
-          )
-        `)
-        .eq('fecha', fechaStr)
-        .order('hora', { ascending: true });
-
-      if (turnosError) throw turnosError;
-
-      // Mapear correctamente los datos de pacientes
-      const turnosMapeados: TurnoConPaciente[] = (turnosData || []).map((turno: any) => {
-        const paciente = Array.isArray(turno.pacientes) ? turno.pacientes[0] : turno.pacientes;
-        return {
-          ...turno,
-          pacientes: paciente || null,
-        };
-      }).filter((turno: TurnoConPaciente) => turno.pacientes !== null);
-
-      setTurnosParaImprimir(turnosMapeados);
-      setMostrarSelectorFecha(false);
-      // Pequeño delay para que se actualice el estado antes de imprimir
-      setTimeout(() => {
-        window.print();
-      }, 200);
-    } catch (error) {
-      console.error('Error al cargar turnos para imprimir:', error);
-      showError('❌ Error al cargar turnos de la fecha seleccionada');
-    } finally {
-      setCargandoTurnosImpresion(false);
-    }
-  };
 
   return (
-    <>
-      {/* Vista de impresión (solo visible al imprimir) */}
-      <VistaImpresionTurnos turnos={turnosParaImprimir} fecha={fechaParaImprimir} />
-      
-      {/* Vista normal (oculta al imprimir) */}
-      <div className="bg-white rounded-lg shadow-lg no-print">
+    <div className="bg-white rounded-lg shadow-lg">
         {/* Header con resumen y controles */}
         <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-indigo-200 px-4 sm:px-6 py-5">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
@@ -330,24 +232,6 @@ export default function AgendaDiaria({
                 <span className="sm:hidden">PDF</span>
               </button>
               <button
-                onClick={handleImprimir}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm font-semibold shadow-sm"
-                title="Imprimir agenda del día actual"
-                aria-label="Imprimir agenda del día"
-              >
-                <Printer className="w-4 h-4" />
-                <span className="hidden sm:inline">Imprimir</span>
-              </button>
-              <button
-                onClick={handleImprimirOtraFecha}
-                className="flex items-center justify-center gap-2 px-3 py-2.5 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition text-xs font-semibold shadow-sm border border-gray-200"
-                title="Imprimir otra fecha"
-                aria-label="Seleccionar otra fecha para imprimir"
-              >
-                <Calendar className="w-3 h-3" />
-                <span className="hidden lg:inline">Otra fecha</span>
-              </button>
-              <button
                 onClick={() => onAbrirModalTurno()}
                 className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold shadow-md hover:shadow-lg"
                 aria-label="Crear nuevo turno"
@@ -360,111 +244,6 @@ export default function AgendaDiaria({
           </div>
         </div>
 
-        {/* Selector de fecha para imprimir (opcional - para imprimir otra fecha) */}
-        {mostrarSelectorFecha && (
-          <div className="px-4 sm:px-6 py-4 border-b bg-yellow-50 border-yellow-200">
-            <div className="p-4 bg-white border-2 border-indigo-200 rounded-lg shadow-sm">
-              <label className="block text-sm font-bold text-gray-900 mb-3">
-                📅 Seleccionar otra fecha para imprimir (opcional):
-              </label>
-              <p className="text-xs text-gray-600 mb-3">
-                💡 Por defecto se imprimen los turnos del día actual. Selecciona otra fecha si deseas imprimir un día diferente.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="date"
-                  value={format(fechaParaImprimir, 'yyyy-MM-dd')}
-                  onChange={(e) => {
-                    try {
-                      if (e.target.value) {
-                        const nuevaFecha = new Date(e.target.value + 'T00:00:00');
-                        if (!isNaN(nuevaFecha.getTime())) {
-                          setFechaParaImprimir(nuevaFecha);
-                        }
-                      }
-                    } catch (error) {
-                      console.error('Error al cambiar fecha:', error);
-                    }
-                  }}
-                  className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 text-sm font-medium"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleConfirmarFechaImpresion}
-                    disabled={cargandoTurnosImpresion}
-                    className="px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                  >
-                    {cargandoTurnosImpresion ? 'Cargando...' : 'Imprimir'}
-                  </button>
-                  <button
-                    onClick={async () => {
-                      setFechaParaImprimir(fechaSeleccionada);
-                      setTurnosParaImprimir(turnos);
-                      setMostrarSelectorFecha(false);
-                    }}
-                    className="px-4 py-2.5 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition text-sm font-semibold"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={async () => {
-                      // Cargar datos completos del paciente para el día actual
-                      setCargandoTurnosImpresion(true);
-                      try {
-                        const fechaStr = format(fechaSeleccionada, 'yyyy-MM-dd');
-                        const { data: turnosData, error: turnosError } = await supabase
-                          .from('turnos')
-                          .select(`
-                            *,
-                            pacientes (
-                              id,
-                              nombre,
-                              apellido,
-                              telefono,
-                              email,
-                              fecha_nacimiento,
-                              numero_ficha,
-                              direccion,
-                              dni
-                            )
-                          `)
-                          .eq('fecha', fechaStr)
-                          .order('hora', { ascending: true });
-
-                        if (turnosError) throw turnosError;
-
-                        // Mapear correctamente los datos de pacientes
-                        const turnosMapeados: TurnoConPaciente[] = (turnosData || []).map((turno: any) => {
-                          const paciente = Array.isArray(turno.pacientes) ? turno.pacientes[0] : turno.pacientes;
-                          return {
-                            ...turno,
-                            pacientes: paciente || null,
-                          };
-                        }).filter((turno: TurnoConPaciente) => turno.pacientes !== null);
-
-                        setTurnosParaImprimir(turnosMapeados);
-                        setFechaParaImprimir(fechaSeleccionada);
-                        setMostrarSelectorFecha(false);
-                        setTimeout(() => {
-                          window.print();
-                        }, 200);
-                      } catch (error) {
-                        console.error('Error al cargar turnos para imprimir:', error);
-                        showError('❌ Error al cargar turnos del día actual');
-                      } finally {
-                        setCargandoTurnosImpresion(false);
-                      }
-                    }}
-                    disabled={cargandoTurnosImpresion}
-                    className="px-4 py-2.5 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {cargandoTurnosImpresion ? 'Cargando...' : 'Día actual'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Agenda de turnos */}
         <div className="overflow-y-auto max-h-[calc(100vh-400px)] sm:max-h-[calc(100vh-450px)]">
