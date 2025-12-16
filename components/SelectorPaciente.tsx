@@ -87,6 +87,7 @@ export default function SelectorPaciente({
       // Si se deseleccionó, limpiar búsqueda
       setBusqueda('');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, pacienteSeleccionado]);
 
   return (

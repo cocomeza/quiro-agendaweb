@@ -91,7 +91,7 @@ export function generarPDFTurnos(turnos: TurnoConPaciente[], fecha: Date) {
 
   // Pie de página
   const fechaImpresion = format(new Date(), "dd/MM/yyyy 'a las' HH:mm", { locale: es });
-  const pageCount = doc.getNumberOfPages();
+  const pageCount = (doc as any).internal.getNumberOfPages();
   
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
@@ -101,7 +101,7 @@ export function generarPDFTurnos(turnos: TurnoConPaciente[], fecha: Date) {
     doc.text(
       `Impreso el ${fechaImpresion} - Página ${i} de ${pageCount}`,
       105,
-      doc.internal.pageSize.height - 10,
+      (doc as any).internal.pageSize.height - 10,
       { align: 'center' }
     );
   }
