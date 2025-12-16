@@ -3,7 +3,7 @@
 import { format, isToday } from 'date-fns';
 import { es } from 'date-fns/locale/es';
 import type { TurnoConPaciente, TurnoConPago, Paciente } from '@/lib/supabase/types';
-import { Calendar, ChevronLeft, ChevronRight, Plus, Printer, Phone, Copy, AlertCircle, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Plus, Printer, Phone, Copy, AlertCircle, CheckCircle, Clock, XCircle, Download } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import ResumenDia from './ResumenDia';
@@ -12,6 +12,7 @@ import VistaImpresionTurnos from './VistaImpresionTurnos';
 import ListaPacientesDia from './ListaPacientesDia';
 import { copiarAlPortapapeles, esTurnoProximo, esTurnoAtrasado, FRANJAS_HORARIAS } from '@/lib/utils';
 import { showSuccess, showError } from '@/lib/toast';
+import { generarPDFTurnos } from '@/lib/pdf';
 
 interface AgendaDiariaProps {
   fechaSeleccionada: Date;
@@ -103,12 +104,50 @@ export default function AgendaDiaria({
   }, [turnos, fechaSeleccionada]);
 
   const handleImprimir = () => {
-    // Si no hay selector visible, mostrar selector para elegir fecha
+    // Si no hay selector visible, usar directamente los turnos del día actual
     if (!mostrarSelectorFecha) {
-      setMostrarSelectorFecha(true);
+      // Asegurar que los turnos estén actualizados
+      const turnosConDatosCompletos = turnos.filter(t => 
+        t.pacientes && 
+        t.pacientes.nombre && 
+        t.pacientes.apellido
+      );
+      setTurnosParaImprimir(turnosConDatosCompletos);
+      setFechaParaImprimir(fechaSeleccionada);
+      // Pequeño delay para que se actualice el estado antes de imprimir
+      setTimeout(() => {
+        window.print();
+      }, 200);
       return;
     }
     // Si ya se seleccionó la fecha, la impresión se hace en handleConfirmarFechaImpresion
+  };
+
+  const handleImprimirOtraFecha = () => {
+    // Mostrar selector para elegir otra fecha
+    setMostrarSelectorFecha(true);
+  };
+
+  const handleDescargarPDF = () => {
+    try {
+      // Usar los turnos actuales del día seleccionado
+      const turnosParaPDF = turnos.filter(t => 
+        t.pacientes && 
+        t.pacientes.nombre && 
+        t.pacientes.apellido
+      );
+      
+      if (turnosParaPDF.length === 0) {
+        showError('❌ No hay turnos para descargar en este día');
+        return;
+      }
+
+      generarPDFTurnos(turnosParaPDF, fechaSeleccionada);
+      showSuccess('✅ PDF descargado exitosamente');
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      showError('❌ Error al generar el PDF');
+    }
   };
 
   const handleConfirmarFechaImpresion = async () => {
@@ -281,13 +320,32 @@ export default function AgendaDiaria({
             </div>
             <div className="flex gap-2">
               <button
+                onClick={handleDescargarPDF}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-semibold shadow-sm"
+                title="Descargar lista en PDF"
+                aria-label="Descargar lista de turnos en PDF"
+              >
+                <Download className="w-4 h-4" />
+                <span className="hidden sm:inline">Descargar PDF</span>
+                <span className="sm:hidden">PDF</span>
+              </button>
+              <button
                 onClick={handleImprimir}
                 className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm font-semibold shadow-sm"
-                title="Imprimir agenda"
+                title="Imprimir agenda del día actual"
                 aria-label="Imprimir agenda del día"
               >
                 <Printer className="w-4 h-4" />
                 <span className="hidden sm:inline">Imprimir</span>
+              </button>
+              <button
+                onClick={handleImprimirOtraFecha}
+                className="flex items-center justify-center gap-2 px-3 py-2.5 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition text-xs font-semibold shadow-sm border border-gray-200"
+                title="Imprimir otra fecha"
+                aria-label="Seleccionar otra fecha para imprimir"
+              >
+                <Calendar className="w-3 h-3" />
+                <span className="hidden lg:inline">Otra fecha</span>
               </button>
               <button
                 onClick={() => onAbrirModalTurno()}
@@ -302,13 +360,16 @@ export default function AgendaDiaria({
           </div>
         </div>
 
-        {/* Selector de fecha para imprimir */}
+        {/* Selector de fecha para imprimir (opcional - para imprimir otra fecha) */}
         {mostrarSelectorFecha && (
           <div className="px-4 sm:px-6 py-4 border-b bg-yellow-50 border-yellow-200">
             <div className="p-4 bg-white border-2 border-indigo-200 rounded-lg shadow-sm">
               <label className="block text-sm font-bold text-gray-900 mb-3">
-                📅 Seleccionar fecha para imprimir:
+                📅 Seleccionar otra fecha para imprimir (opcional):
               </label>
+              <p className="text-xs text-gray-600 mb-3">
+                💡 Por defecto se imprimen los turnos del día actual. Selecciona otra fecha si deseas imprimir un día diferente.
+              </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="date"
