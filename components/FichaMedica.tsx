@@ -332,15 +332,15 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
               <h3 className="text-lg font-bold mb-4 border-b border-gray-300 pb-2">HISTORIA DE SALUD</h3>
               <div className="space-y-2 text-sm">
                 <div>1- Nacimiento: {historiaSalud.nacimiento_natural ? 'Natural ☑' : ''} {historiaSalud.nacimiento_cesarea ? 'Cesárea ☑' : ''}</div>
-                <div>2- ¿Tuvo golpes/caídas de niño? {historiaSalud.golpes_caidas_nino ? 'SI ☑' : 'NO ☑'}</div>
-                <div>3- ¿Tuvo accidentes, caídas, golpes? {historiaSalud.accidentes_caidas_golpes ? 'SI ☑' : 'NO ☑'}</div>
-                <div>4- ¿Hace ejercicios regularmente? {historiaSalud.hace_ejercicios ? 'SI ☑' : 'NO ☑'}</div>
-                <div>5- ¿Tiene o siente estrés físico, mental o emocional? {historiaSalud.tiene_estres ? 'SI ☑' : 'NO ☑'}</div>
+                <div>2- ¿Tuvo golpes o caídas de niño? {historiaSalud.golpes_caidas_nino === true ? 'SI ☑' : historiaSalud.golpes_caidas_nino === false ? 'NO ☑' : ''}</div>
+                <div>3- ¿Tuvo accidentes, caídas, golpes? {historiaSalud.accidentes_caidas_golpes === true ? 'SI ☑' : historiaSalud.accidentes_caidas_golpes === false ? 'NO ☑' : ''}</div>
+                <div>4- ¿Hace ejercicios regularmente? {historiaSalud.hace_ejercicios === true ? 'SI ☑' : historiaSalud.hace_ejercicios === false ? 'NO ☑' : ''}</div>
+                <div>5- ¿Tiene o siente estrés físico, mental o emocional? {historiaSalud.tiene_estres === true ? 'SI ☑' : historiaSalud.tiene_estres === false ? 'NO ☑' : ''}</div>
                 <div>6- ¿Cómo duerme? {historiaSalud.duerme_boca_arriba ? 'Boca arriba ☑' : ''} {historiaSalud.duerme_de_costado ? 'De costado ☑' : ''} {historiaSalud.duerme_boca_abajo ? 'Boca abajo ☑' : ''}</div>
-                <div>7- ¿Tuvo intoxicaciones? {historiaSalud.intoxicaciones ? 'SI ☑' : 'NO ☑'}</div>
-                <div>8- ¿Se realizó cirugías? {historiaSalud.cirugias ? 'SI ☑' : 'NO ☑'} {historiaSalud.cirugias_causa && `Causa: ${historiaSalud.cirugias_causa}`}</div>
-                <div>¿Tuvo fracturas? {historiaSalud.fracturas ? 'SI ☑' : 'NO ☑'}</div>
-                <div>9- ¿Estuvo internado? {historiaSalud.internado ? 'SI ☑' : 'NO ☑'} {historiaSalud.internado_causa && `Causa: ${historiaSalud.internado_causa}`}</div>
+                <div>7- ¿Tuvo intoxicaciones? (comidas – remedios – insecticidas – drogas?) {historiaSalud.intoxicaciones === true ? 'SI ☑' : historiaSalud.intoxicaciones === false ? 'NO ☑' : ''}</div>
+                <div>8- ¿Se realizó cirugías? {historiaSalud.cirugias === true ? 'SI ☑' : historiaSalud.cirugias === false ? 'NO ☑' : ''} {historiaSalud.cirugias_causa && `Causa: ${historiaSalud.cirugias_causa}`}</div>
+                <div>¿Tuvo fracturas? {historiaSalud.fracturas === true ? 'SI ☑' : historiaSalud.fracturas === false ? 'NO ☑' : ''}</div>
+                <div>9- ¿Estuvo internado? {historiaSalud.internado === true ? 'SI ☑' : historiaSalud.internado === false ? 'NO ☑' : ''} {historiaSalud.internado_causa && `Causa: ${historiaSalud.internado_causa}`}</div>
                 <div>10- Médico de familia o de cabecera: {historiaSalud.medico_familia || 'N/A'}</div>
               </div>
             </div>
@@ -350,11 +350,151 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
           {Object.keys(problemasMedicos).length > 0 && (
             <div className="mb-6">
               <h3 className="text-lg font-bold mb-4 border-b border-gray-300 pb-2">PROBLEMAS MÉDICOS</h3>
-              <div className="text-sm space-y-1">
-                {problemasMedicos.neumonia && <div>☑ Neumonía</div>}
-                {problemasMedicos.diabetes && <div>☑ Diabetes</div>}
-                {problemasMedicos.artritis && <div>☑ Artritis</div>}
-                {/* Agregar más según sea necesario */}
+              <div className="text-sm space-y-3">
+                {/* ENFERMEDADES */}
+                {(problemasMedicos.neumonia || problemasMedicos.diabetes || problemasMedicos.artritis || problemasMedicos.poliomelitis || problemasMedicos.asma || problemasMedicos.tuberculosis || problemasMedicos.cancer || problemasMedicos.problema_tiroides || problemasMedicos.enfermedad_cardiaca) && (
+                  <div>
+                    <h4 className="font-semibold mb-1">ENFERMEDADES</h4>
+                    <div className="pl-4 space-y-1">
+                      {problemasMedicos.neumonia && <div>☑ Neumonía</div>}
+                      {problemasMedicos.diabetes && <div>☑ Diabetes</div>}
+                      {problemasMedicos.artritis && <div>☑ Artritis</div>}
+                      {problemasMedicos.poliomelitis && <div>☑ Poliomelitis</div>}
+                      {problemasMedicos.asma && <div>☑ Asma</div>}
+                      {problemasMedicos.tuberculosis && <div>☑ Tuberculosis</div>}
+                      {problemasMedicos.cancer && <div>☑ Cáncer</div>}
+                      {problemasMedicos.problema_tiroides && <div>☑ Problema de tiroides</div>}
+                      {problemasMedicos.enfermedad_cardiaca && <div>☑ Enfermedad cardíaca</div>}
+                    </div>
+                  </div>
+                )}
+
+                {/* MÚSCULO - ESQUELETAL */}
+                {(problemasMedicos.dolor_columna_baja || problemasMedicos.dolor_entre_hombros || problemasMedicos.dolor_brazo || problemasMedicos.dolor_cuello || problemasMedicos.debilidad_muscular || problemasMedicos.problemas_caminar || problemasMedicos.dolor_inmovilidad_articular || problemasMedicos.restriccion_movimiento || problemasMedicos.crujidos_mandibula || problemasMedicos.dificultad_masticacion) && (
+                  <div>
+                    <h4 className="font-semibold mb-1">MÚSCULO - ESQUELETAL</h4>
+                    <div className="pl-4 space-y-1">
+                      {problemasMedicos.dolor_columna_baja && <div>☑ Dolor de columna baja</div>}
+                      {problemasMedicos.dolor_entre_hombros && <div>☑ Dolor entre los hombros</div>}
+                      {problemasMedicos.dolor_brazo && <div>☑ Dolor de brazo</div>}
+                      {problemasMedicos.dolor_cuello && <div>☑ Dolor de cuello</div>}
+                      {problemasMedicos.debilidad_muscular && <div>☑ Debilidad muscular</div>}
+                      {problemasMedicos.problemas_caminar && <div>☑ Problemas al caminar</div>}
+                      {problemasMedicos.dolor_inmovilidad_articular && <div>☑ Dolor o inmovilidad articular</div>}
+                      {problemasMedicos.restriccion_movimiento && <div>☑ Restricción de movimiento</div>}
+                      {problemasMedicos.crujidos_mandibula && <div>☑ Crujidos en mandíbula</div>}
+                      {problemasMedicos.dificultad_masticacion && <div>☑ Dificultad con la masticación</div>}
+                    </div>
+                  </div>
+                )}
+
+                {/* SISTEMA NERVIOSO */}
+                {(problemasMedicos.nerviosismo || problemasMedicos.confusion_depresion || problemasMedicos.convulsiones || problemasMedicos.olvidadizo || problemasMedicos.paralisis || problemasMedicos.adormecimiento || problemasMedicos.desmayos || problemasMedicos.frio || problemasMedicos.hormigueo_extremidades || problemasMedicos.mareo) && (
+                  <div>
+                    <h4 className="font-semibold mb-1">SISTEMA NERVIOSO</h4>
+                    <div className="pl-4 space-y-1">
+                      {problemasMedicos.nerviosismo && <div>☑ Nerviosismo</div>}
+                      {problemasMedicos.confusion_depresion && <div>☑ Confusión / Depresión</div>}
+                      {problemasMedicos.convulsiones && <div>☑ Convulsiones</div>}
+                      {problemasMedicos.olvidadizo && <div>☑ Olvidadizo</div>}
+                      {problemasMedicos.paralisis && <div>☑ Parálisis</div>}
+                      {problemasMedicos.adormecimiento && <div>☑ Adormecimiento</div>}
+                      {problemasMedicos.desmayos && <div>☑ Desmayos</div>}
+                      {problemasMedicos.frio && <div>☑ Frío</div>}
+                      {problemasMedicos.hormigueo_extremidades && <div>☑ Hormigueo en extremidades</div>}
+                      {problemasMedicos.mareo && <div>☑ Mareo</div>}
+                    </div>
+                  </div>
+                )}
+
+                {/* GENERAL */}
+                {(problemasMedicos.dolores_cabeza || problemasMedicos.fiebre || problemasMedicos.fatiga) && (
+                  <div>
+                    <h4 className="font-semibold mb-1">GENERAL</h4>
+                    <div className="pl-4 space-y-1">
+                      {problemasMedicos.dolores_cabeza && <div>☑ Dolores de cabeza</div>}
+                      {problemasMedicos.fiebre && <div>☑ Fiebre</div>}
+                      {problemasMedicos.fatiga && <div>☑ Fatiga</div>}
+                    </div>
+                  </div>
+                )}
+
+                {/* GASTRO - INTESTINAL */}
+                {(problemasMedicos.constipacion || problemasMedicos.diarrea || problemasMedicos.problemas_peso || problemasMedicos.problemas_higado || problemasMedicos.heces_negras_sangre || problemasMedicos.nauseas_vomitos_frecuentes || problemasMedicos.molestias_abdominales || problemasMedicos.problema_vesicula) && (
+                  <div>
+                    <h4 className="font-semibold mb-1">GASTRO - INTESTINAL</h4>
+                    <div className="pl-4 space-y-1">
+                      {problemasMedicos.constipacion && <div>☑ Constipación</div>}
+                      {problemasMedicos.diarrea && <div>☑ Diarrea</div>}
+                      {problemasMedicos.problemas_peso && <div>☑ Problemas de peso</div>}
+                      {problemasMedicos.problemas_higado && <div>☑ Problemas de hígado</div>}
+                      {problemasMedicos.heces_negras_sangre && <div>☑ Heces negras / con sangre</div>}
+                      {problemasMedicos.nauseas_vomitos_frecuentes && <div>☑ Náuseas y vómitos frecuentes</div>}
+                      {problemasMedicos.molestias_abdominales && <div>☑ Molestias abdominales</div>}
+                      {problemasMedicos.problema_vesicula && <div>☑ Problema de vesícula</div>}
+                    </div>
+                  </div>
+                )}
+
+                {/* GENITO - URINARIO */}
+                {(problemasMedicos.problemas_vejiga || problemasMedicos.orina_dolorosa_excesiva || problemasMedicos.orina_colores_anormales) && (
+                  <div>
+                    <h4 className="font-semibold mb-1">GENITO - URINARIO</h4>
+                    <div className="pl-4 space-y-1">
+                      {problemasMedicos.problemas_vejiga && <div>☑ Problemas de vejiga</div>}
+                      {problemasMedicos.orina_dolorosa_excesiva && <div>☑ Orina dolorosa / excesiva</div>}
+                      {problemasMedicos.orina_colores_anormales && <div>☑ Orina con colores anormales</div>}
+                    </div>
+                  </div>
+                )}
+
+                {/* CARDIO - VASCULAR */}
+                {(problemasMedicos.dolor_pecho || problemasMedicos.palpitaciones_irregulares || problemasMedicos.hipertension_arterial || problemasMedicos.problemas_pulmonares_congestion || problemasMedicos.hinchazon_tobillos || problemasMedicos.falta_aire || problemasMedicos.problemas_corazon || problemasMedicos.accidente_cerebro_vascular || problemasMedicos.varices) && (
+                  <div>
+                    <h4 className="font-semibold mb-1">CARDIO - VASCULAR</h4>
+                    <div className="pl-4 space-y-1">
+                      {problemasMedicos.dolor_pecho && <div>☑ Dolor de pecho</div>}
+                      {problemasMedicos.palpitaciones_irregulares && <div>☑ Palpitaciones irregulares</div>}
+                      {problemasMedicos.hipertension_arterial && <div>☑ Hipertensión arterial</div>}
+                      {problemasMedicos.problemas_pulmonares_congestion && <div>☑ Problemas pulmonares / congestión</div>}
+                      {problemasMedicos.hinchazon_tobillos && <div>☑ Hinchazón de los tobillos</div>}
+                      {problemasMedicos.falta_aire && <div>☑ Falta de aire</div>}
+                      {problemasMedicos.problemas_corazon && <div>☑ Problemas de corazón</div>}
+                      {problemasMedicos.accidente_cerebro_vascular && <div>☑ Accidente cerebro-vascular</div>}
+                      {problemasMedicos.varices && <div>☑ Várices</div>}
+                    </div>
+                  </div>
+                )}
+
+                {/* ORL */}
+                {(problemasMedicos.problemas_vision || problemasMedicos.molestia_garganta || problemasMedicos.dificultad_audicion || problemasMedicos.zumbido_oidos || problemasMedicos.dolor_oidos || problemasMedicos.nariz_tapada) && (
+                  <div>
+                    <h4 className="font-semibold mb-1">ORL</h4>
+                    <div className="pl-4 space-y-1">
+                      {problemasMedicos.problemas_vision && <div>☑ Problemas de visión</div>}
+                      {problemasMedicos.molestia_garganta && <div>☑ Molestia en garganta</div>}
+                      {problemasMedicos.dificultad_audicion && <div>☑ Dificultad de audición</div>}
+                      {problemasMedicos.zumbido_oidos && <div>☑ Zumbido de oídos</div>}
+                      {problemasMedicos.dolor_oidos && <div>☑ Dolor de oídos</div>}
+                      {problemasMedicos.nariz_tapada && <div>☑ Nariz tapada</div>}
+                    </div>
+                  </div>
+                )}
+
+                {/* FEMENINO */}
+                {(problemasMedicos.irregularidad_menstrual || problemasMedicos.molestias_menstruales || problemasMedicos.tiene_hijos || problemasMedicos.esta_embarazada === true || problemasMedicos.esta_embarazada === false || problemasMedicos.no_segura_embarazada === true) && (
+                  <div>
+                    <h4 className="font-semibold mb-1">FEMENINO</h4>
+                    <div className="pl-4 space-y-1">
+                      {problemasMedicos.irregularidad_menstrual && <div>☑ Irregularidad menstrual</div>}
+                      {problemasMedicos.molestias_menstruales && <div>☑ Molestias menstruales</div>}
+                      {problemasMedicos.tiene_hijos && <div>☑ Tiene hijos, ¿cuántos? {problemasMedicos.cantidad_hijos || ''}</div>}
+                      {problemasMedicos.esta_embarazada === true && <div>☑ ¿Está usted embarazada? SI</div>}
+                      {problemasMedicos.esta_embarazada === false && <div>☑ ¿Está usted embarazada? NO</div>}
+                      {problemasMedicos.no_segura_embarazada === true && <div>☑ ¿Está usted embarazada? No estoy segura</div>}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
