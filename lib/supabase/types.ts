@@ -24,6 +24,20 @@ export interface Paciente {
   diagnostico?: string | null;
   plan_tratamiento?: string | null;
   observaciones_medicas?: string | null;
+  // Nuevos campos de información general
+  estado_civil?: string | null;
+  recomendado_por?: string | null;
+  barrio?: string | null;
+  ciudad?: string | null;
+  provincia?: string | null;
+  obra_social?: string | null;
+  telefono_laboral?: string | null;
+  ocupacion_actual?: string | null;
+  ocupaciones_previas?: string | null;
+  hobbies_deportes?: string | null;
+  // Campos JSON para historia de salud y problemas médicos
+  historia_salud?: any;
+  problemas_medicos?: any;
   created_at: string;
   updated_at: string;
 }
