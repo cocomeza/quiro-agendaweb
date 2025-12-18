@@ -603,7 +603,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="text"
                         value={`${paciente.apellido}, ${paciente.nombre}`}
                         disabled
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-gray-50 text-gray-900 font-medium"
                       />
                     </div>
                     
@@ -615,7 +615,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="text"
                         value={calcularEdad() !== null ? `${calcularEdad()} años` : 'N/A'}
                         disabled
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-gray-50 text-gray-900 font-medium"
                       />
                     </div>
                     
@@ -627,7 +627,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="text"
                         value={paciente.fecha_nacimiento ? format(new Date(paciente.fecha_nacimiento), 'dd/MM/yyyy', { locale: es }) : 'N/A'}
                         disabled
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-gray-50 text-gray-900 font-medium"
                       />
                     </div>
                     
@@ -638,7 +638,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                       <select
                         value={estadoCivil}
                         onChange={(e) => setEstadoCivil(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       >
                         <option value="">Seleccionar...</option>
                         <option value="Soltero/a">Soltero/a</option>
@@ -657,7 +657,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="text"
                         value={recomendadoPor}
                         onChange={(e) => setRecomendadoPor(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Persona o medio que recomendó"
                       />
                     </div>
@@ -670,7 +670,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="text"
                         value={paciente.dni || ''}
                         disabled
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-gray-50 text-gray-900 font-medium"
                       />
                     </div>
                     
@@ -682,7 +682,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="text"
                         value={paciente.direccion || ''}
                         disabled
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-gray-50 text-gray-900 font-medium"
                       />
                     </div>
                     
@@ -694,7 +694,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="text"
                         value={barrio}
                         onChange={(e) => setBarrio(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Barrio"
                       />
                     </div>
@@ -707,7 +707,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="text"
                         value={ciudad}
                         onChange={(e) => setCiudad(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Ciudad"
                       />
                     </div>
@@ -720,7 +720,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="text"
                         value={provincia}
                         onChange={(e) => setProvincia(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Provincia"
                       />
                     </div>
@@ -733,7 +733,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="text"
                         value={obraSocial}
                         onChange={(e) => setObraSocial(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Obra social o seguro médico"
                       />
                     </div>
@@ -746,7 +746,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="text"
                         value={paciente.telefono || ''}
                         disabled
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-gray-50 text-gray-900 font-medium"
                       />
                     </div>
                     
@@ -758,7 +758,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="text"
                         value={telefonoLaboral}
                         onChange={(e) => setTelefonoLaboral(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Teléfono laboral"
                       />
                     </div>
@@ -771,7 +771,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="text"
                         value={ocupacionActual}
                         onChange={(e) => setOcupacionActual(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Ocupación actual"
                       />
                     </div>
@@ -784,7 +784,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="text"
                         value={ocupacionesPrevias}
                         onChange={(e) => setOcupacionesPrevias(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Ocupaciones previas"
                       />
                     </div>
@@ -797,7 +797,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="text"
                         value={hobbiesDeportes}
                         onChange={(e) => setHobbiesDeportes(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Hobbies y deportes"
                       />
                     </div>
@@ -810,7 +810,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         type="email"
                         value={paciente.email || ''}
                         disabled
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-gray-50 text-gray-900 font-medium"
                       />
                     </div>
                   </div>
@@ -1141,7 +1141,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                             value={historiaSalud.internado_causa || ''}
                             onChange={(e) => actualizarHistoriaSalud('internado_causa', e.target.value)}
                             placeholder="Causa de la internación"
-                            className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                           />
                         </div>
                       )}
@@ -1157,7 +1157,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         value={historiaSalud.medico_familia || ''}
                         onChange={(e) => actualizarHistoriaSalud('medico_familia', e.target.value)}
                         placeholder="Nombre del médico de familia o de cabecera"
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       />
                     </div>
                   </div>
@@ -1455,7 +1455,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                               value={problemasMedicos.cantidad_hijos || ''}
                               onChange={(e) => actualizarProblemasMedicos('cantidad_hijos', e.target.value)}
                               placeholder="Cantidad"
-                              className="px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                              className="px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             />
                           )}
                         </div>
@@ -1539,7 +1539,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         rows={3}
                         value={motivoConsulta}
                         onChange={(e) => setMotivoConsulta(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Describa el motivo principal de consulta..."
                       />
                     </div>
@@ -1552,7 +1552,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         rows={4}
                         value={antecedentesMedicos}
                         onChange={(e) => setAntecedentesMedicos(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Enfermedades previas, cirugías, lesiones anteriores..."
                       />
                     </div>
@@ -1565,7 +1565,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         rows={3}
                         value={medicamentosActuales}
                         onChange={(e) => setMedicamentosActuales(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Lista de medicamentos que el paciente está tomando actualmente..."
                       />
                     </div>
@@ -1578,7 +1578,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         rows={2}
                         value={alergias}
                         onChange={(e) => setAlergias(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Alergias conocidas (medicamentos, alimentos, etc.)..."
                       />
                     </div>
@@ -1591,7 +1591,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         rows={4}
                         value={diagnostico}
                         onChange={(e) => setDiagnostico(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Diagnóstico establecido..."
                       />
                     </div>
@@ -1604,7 +1604,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         rows={4}
                         value={planTratamiento}
                         onChange={(e) => setPlanTratamiento(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Plan de tratamiento establecido..."
                       />
                     </div>
@@ -1617,7 +1617,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                         rows={4}
                         value={observacionesMedicas}
                         onChange={(e) => setObservacionesMedicas(e.target.value)}
-                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="w-full px-3 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Observaciones adicionales sobre el paciente..."
                       />
                     </div>
