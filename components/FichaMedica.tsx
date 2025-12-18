@@ -95,7 +95,7 @@ interface ProblemasMedicos {
   dolor_pecho?: boolean;
   palpitaciones_irregulares?: boolean;
   hipertension_arterial?: boolean;
-  probl_pulm_congestion?: boolean;
+  problemas_pulmonares_congestion?: boolean;
   hinchazon_tobillos?: boolean;
   falta_aire?: boolean;
   problemas_corazon?: boolean;
@@ -291,7 +291,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
               QUIROPRAXIA RAMALLO
             </h1>
             <p className="text-xl text-gray-700 mb-2">
-              Ficha Médica
+              Quiropraxia para el Mundo
             </p>
             <p className="text-lg text-gray-600">
               {paciente.apellido}, {paciente.nombre}
@@ -733,7 +733,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                     {/* Pregunta 2 */}
                     <div className="border-b border-gray-200 pb-4">
                       <label className="block text-sm font-semibold text-gray-900 mb-2">
-                        2- ¿Tuvo golpes/caídas de niño?
+                        2- ¿Tuvo golpes o caídas de niño?
                       </label>
                       <div className="flex gap-4">
                         <label className="flex items-center gap-2 cursor-pointer">
@@ -916,7 +916,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                       <label className="block text-sm font-semibold text-gray-900 mb-2">
                         8- ¿Se realizó cirugías?
                       </label>
-                      <div className="flex gap-4 mb-2">
+                      <div className="flex gap-4 mb-3">
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
                             type="radio"
@@ -938,18 +938,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                           <span className="text-sm text-gray-700">NO</span>
                         </label>
                       </div>
-                      {historiaSalud.cirugias && (
-                        <div className="mt-2">
-                          <input
-                            type="text"
-                            value={historiaSalud.cirugias_causa || ''}
-                            onChange={(e) => actualizarHistoriaSalud('cirugias_causa', e.target.value)}
-                            placeholder="Causa de la cirugía"
-                            className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                          />
-                        </div>
-                      )}
-                      <div className="mt-3">
+                      <div className="mb-3">
                         <label className="block text-sm font-semibold text-gray-900 mb-2">
                           ¿Tuvo fracturas?
                         </label>
@@ -1237,7 +1226,7 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                           { key: 'dolor_pecho', label: 'Dolor de pecho' },
                           { key: 'palpitaciones_irregulares', label: 'Palpitaciones irregulares' },
                           { key: 'hipertension_arterial', label: 'Hipertensión arterial' },
-                          { key: 'probl_pulm_congestion', label: 'Probl. pulm / congestión' },
+                          { key: 'problemas_pulmonares_congestion', label: 'Problemas pulmonares / congestión' },
                           { key: 'hinchazon_tobillos', label: 'Hinchazón de los tobillos' },
                           { key: 'falta_aire', label: 'Falta de aire' },
                           { key: 'problemas_corazon', label: 'Problemas de corazón' },
