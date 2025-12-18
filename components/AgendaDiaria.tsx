@@ -234,7 +234,7 @@ export default function AgendaDiaria({
             <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-600 font-medium">Completados</p>
+                  <p className="text-xs text-gray-600 font-medium">Atendidos</p>
                   <p className="text-2xl font-bold text-green-600">
                     {turnos.filter(t => t.estado === 'completado').length}
                   </p>
@@ -256,7 +256,7 @@ export default function AgendaDiaria({
             <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-gray-600 font-medium">Cancelados</p>
+                  <p className="text-xs text-gray-600 font-medium">Anulados</p>
                   <p className="text-2xl font-bold text-red-600">
                     {turnos.filter(t => t.estado === 'cancelado').length}
                   </p>
@@ -376,7 +376,7 @@ export default function AgendaDiaria({
               <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <Calendar className="w-10 h-10 text-gray-400" />
               </div>
-              <p className="text-gray-700 text-lg font-semibold mb-2">No hay turnos programados</p>
+              <p className="text-gray-700 text-lg font-semibold mb-2">No hay turnos pendientes</p>
               <p className="text-gray-500 text-sm mb-6">Comienza agregando un turno para este día</p>
               <button
                 onClick={() => onAbrirModalTurno()}
@@ -505,9 +505,9 @@ export default function AgendaDiaria({
                             )}
                           </div>
                           <span className="text-xs sm:text-sm font-bold px-2 sm:px-3 py-1 bg-white rounded-md self-start sm:self-auto shadow-sm border border-gray-200">
-                            {turno.estado === 'completado' ? 'Completado' :
-                             turno.estado === 'programado' ? 'Programado' :
-                             turno.estado === 'cancelado' ? 'Cancelado' :
+                            {turno.estado === 'completado' ? 'Atendido' :
+                             turno.estado === 'programado' ? 'Pendiente' :
+                             turno.estado === 'cancelado' ? 'Anulado' :
                              turno.estado}
                           </span>
                         </div>

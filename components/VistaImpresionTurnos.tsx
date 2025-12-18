@@ -49,7 +49,7 @@ export default function VistaImpresionTurnos({ turnos, fecha }: VistaImpresionTu
         {/* Tabla de turnos */}
         {turnosOrdenados.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            No hay turnos programados para este día
+            No hay turnos pendientes para este día
           </div>
         ) : (
           <table className="w-full border-collapse">

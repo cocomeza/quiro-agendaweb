@@ -382,7 +382,10 @@ export default function ListaPacientes({
                                       ? 'bg-red-100 text-red-700'
                                       : 'bg-blue-100 text-blue-700'
                                   }`}>
-                                    {turno.estado}
+                                    {turno.estado === 'completado' ? 'Atendido' :
+                                     turno.estado === 'programado' ? 'Pendiente' :
+                                     turno.estado === 'cancelado' ? 'Anulado' :
+                                     turno.estado}
                                   </span>
                                 </div>
                                 <button
@@ -401,7 +404,7 @@ export default function ListaPacientes({
                           </div>
                         )}
                         {turnosPacientes[paciente.id] && turnosPacientes[paciente.id].length === 0 && (
-                          <p className="text-xs text-gray-500 italic">No hay turnos futuros programados</p>
+                          <p className="text-xs text-gray-500 italic">No hay turnos futuros pendientes</p>
                         )}
                       </div>
                     </div>

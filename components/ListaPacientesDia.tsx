@@ -109,7 +109,7 @@ export default function ListaPacientesDia({ turnos, fecha }: ListaPacientesDiaPr
       <div className="p-4 sm:p-6 print:p-8">
         {turnosOrdenados.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            <p className="text-base font-medium">No hay pacientes con turno programado para este día</p>
+            <p className="text-base font-medium">No hay pacientes con turno pendiente para este día</p>
           </div>
         ) : (
           <div className="overflow-x-auto">

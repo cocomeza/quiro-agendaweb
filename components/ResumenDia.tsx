@@ -26,7 +26,7 @@ export default function ResumenDia({ turnos, fecha }: ResumenDiaProps) {
       iconColor: 'text-blue-600',
     },
     {
-      titulo: 'Completados',
+      titulo: 'Atendidos',
       valor: completados,
       icono: CheckCircle,
       color: 'bg-green-100 text-green-800 border-green-300',
@@ -40,7 +40,7 @@ export default function ResumenDia({ turnos, fecha }: ResumenDiaProps) {
       iconColor: 'text-yellow-600',
     },
     {
-      titulo: 'Cancelados',
+      titulo: 'Anulados',
       valor: cancelados,
       icono: XCircle,
       color: 'bg-red-100 text-red-800 border-red-300',

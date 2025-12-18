@@ -333,9 +333,9 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
                   : 'border-blue-500 text-blue-700'
               }`}
             >
-              <option value="programado" className="text-blue-700 font-bold">Programado</option>
-              <option value="completado" className="text-green-700 font-bold">Completado</option>
-              <option value="cancelado" className="text-red-700 font-bold">Cancelado</option>
+              <option value="programado" className="text-blue-700 font-bold">Pendiente</option>
+              <option value="completado" className="text-green-700 font-bold">Atendido</option>
+              <option value="cancelado" className="text-red-700 font-bold">Anulado</option>
             </select>
           </div>
 

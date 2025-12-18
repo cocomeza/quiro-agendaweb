@@ -111,3 +111,19 @@ export function generarFranjasHorarias(): string[] {
  */
 export const FRANJAS_HORARIAS = generarFranjasHorarias();
 
+/**
+ * Mapea el estado del turno (valor de BD) a su nombre de visualización
+ */
+export function obtenerNombreEstado(estado: string): string {
+  switch (estado) {
+    case 'programado':
+      return 'Pendiente';
+    case 'completado':
+      return 'Atendido';
+    case 'cancelado':
+      return 'Anulado';
+    default:
+      return estado;
+  }
+}
+

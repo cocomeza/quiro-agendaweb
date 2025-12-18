@@ -19,6 +19,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
   const [apellido, setApellido] = useState('');
   const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState('');
+  const [dni, setDni] = useState('');
   const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [notas, setNotas] = useState('');
   const [numeroFicha, setNumeroFicha] = useState('');
@@ -33,6 +34,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
       setApellido(paciente.apellido);
       setTelefono(paciente.telefono || '');
       setEmail(paciente.email || '');
+      setDni(paciente.dni || '');
       setFechaNacimiento(paciente.fecha_nacimiento || '');
       setNotas(paciente.notas || '');
       setNumeroFicha(paciente.numero_ficha || '');
@@ -42,6 +44,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
       setApellido('');
       setTelefono('');
       setEmail('');
+      setDni('');
       setFechaNacimiento('');
       setNotas('');
       // Obtener el siguiente número de ficha disponible
@@ -96,6 +99,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
             apellido,
             telefono: telefono || null,
             email: email || null,
+            dni: dni || null,
             fecha_nacimiento: fechaNacimiento || null,
             notas: notas || null,
             numero_ficha: numeroFicha || null,
@@ -113,6 +117,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
             apellido,
             telefono: telefono || null,
             email: email || null,
+            dni: dni || null,
             fecha_nacimiento: fechaNacimiento || null,
             notas: notas || null,
             numero_ficha: numeroFicha || null,
@@ -249,6 +254,21 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="dni" className="block text-sm font-medium text-gray-700 mb-1">
+              Número de Documento
+            </label>
+            <input
+              id="dni"
+              type="text"
+              maxLength={20}
+              value={dni}
+              onChange={(e) => setDni(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Ej: 12345678"
             />
           </div>
 

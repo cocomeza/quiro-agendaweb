@@ -189,12 +189,18 @@ export default function VistaCalendario({
                         <div className="flex-1 flex items-end mt-1">
                           <div className="w-full">
                             {turnosDelDia.slice(0, 3).map((turno, idx) => {
+                              // Validar que el turno tenga paciente antes de renderizar
+                              if (!turno.pacientes) {
+                                return null;
+                              }
                               const colorEstado =
                                 turno.estado === 'completado'
                                   ? 'bg-green-600 text-white border-green-700'
                                   : turno.estado === 'cancelado'
                                   ? 'bg-red-600 text-white border-red-700'
                                   : 'bg-blue-600 text-white border-blue-700';
+                              const nombrePaciente = turno.pacientes.nombre || 'Sin nombre';
+                              const apellidoPaciente = turno.pacientes.apellido || '';
                               return (
                                 <div
                                   key={turno.id}
@@ -203,9 +209,9 @@ export default function VistaCalendario({
                                     onAbrirModalTurno(turno);
                                   }}
                                   className={`${colorEstado} border-2 text-[10px] sm:text-xs px-1.5 py-1 mb-0.5 rounded-md truncate cursor-pointer hover:opacity-90 hover:shadow-md font-bold shadow-sm transition-all`}
-                                  title={`${turno.pacientes.nombre} ${turno.pacientes.apellido} - ${turno.hora} - ${turno.estado}`}
+                                  title={`${nombrePaciente} ${apellidoPaciente} - ${turno.hora} - ${turno.estado}`}
                                 >
-                                  {turno.hora} {turno.pacientes.nombre.split(' ')[0]}
+                                  {turno.hora} {nombrePaciente.split(' ')[0]}
                                 </div>
                               );
                             })}
@@ -242,15 +248,15 @@ export default function VistaCalendario({
               <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-blue-600 border-2 border-blue-700 rounded shadow-sm"></div>
-                  <span className="text-gray-900 font-semibold">Programado</span>
+                  <span className="text-gray-900 font-semibold">Pendiente</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-green-600 border-2 border-green-700 rounded shadow-sm"></div>
-                  <span className="text-gray-900 font-semibold">Completado</span>
+                  <span className="text-gray-900 font-semibold">Atendido</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-red-600 border-2 border-red-700 rounded shadow-sm"></div>
-                  <span className="text-gray-900 font-semibold">Cancelado</span>
+                  <span className="text-gray-900 font-semibold">Anulado</span>
                 </div>
               </div>
             </div>
