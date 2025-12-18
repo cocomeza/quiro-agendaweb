@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, startTransition } from 'react';
 import { format, addDays } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
 import type { TurnoConPaciente, Paciente } from '@/lib/supabase/types';
@@ -41,7 +41,12 @@ export default function AgendaPage() {
   // Limpiar modales cuando se cierran
   useEffect(() => {
     if (!modalTurnoAbierto) {
-      setTurnoSeleccionado(null);
+      // Solo limpiar el turno seleccionado si el modal se cerró
+      // No hacerlo inmediatamente para evitar conflictos con el cierre
+      const timer = setTimeout(() => {
+        setTurnoSeleccionado(null);
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [modalTurnoAbierto]);
 
@@ -130,14 +135,22 @@ export default function AgendaPage() {
   };
 
   const abrirModalTurno = (turno?: TurnoConPaciente) => {
+    // Asegurar que el modal se abra correctamente
+    // Establecer ambos estados de forma síncrona
     setTurnoSeleccionado(turno || null);
     setModalTurnoAbierto(true);
   };
 
   const cerrarModalTurno = () => {
+    // Asegurar que el modal se cierre correctamente
+    // Primero establecer el estado del modal como cerrado
     setModalTurnoAbierto(false);
-    setTurnoSeleccionado(null);
-    cargarDatos();
+    // Luego limpiar el turno seleccionado y recargar datos
+    // Usar un pequeño delay para asegurar que React procese el cambio de estado del modal primero
+    setTimeout(() => {
+      setTurnoSeleccionado(null);
+      cargarDatos();
+    }, 50);
   };
 
   const abrirModalPaciente = (paciente?: Paciente) => {

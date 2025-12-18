@@ -160,8 +160,9 @@ export default function VistaCalendario({
                 return (
                   <div
                     key={dia.toISOString()}
-                    onClick={() => {
-                      if (esDelMesActual) {
+                    onClick={(e) => {
+                      // Solo seleccionar fecha si el click no viene de un turno
+                      if (esDelMesActual && !(e.target as HTMLElement).closest('[data-testid^="turno-calendario-"]')) {
                         onSeleccionarFecha(dia);
                       }
                     }}
@@ -201,17 +202,48 @@ export default function VistaCalendario({
                                   : 'bg-blue-600 text-white border-blue-700';
                               const nombrePaciente = turno.pacientes.nombre || 'Sin nombre';
                               const apellidoPaciente = turno.pacientes.apellido || '';
+                              // Normalizar la hora para mostrar (quitar segundos si existen)
+                              const horaNormalizada = turno.hora.length > 5 
+                                ? turno.hora.substring(0, 5) 
+                                : turno.hora;
+                              
+                              const handleClickTurno = (e: React.MouseEvent) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                // Asegurar que el modal se abra correctamente
+                                if (onAbrirModalTurno) {
+                                  onAbrirModalTurno(turno);
+                                }
+                              };
+
                               return (
                                 <div
                                   key={turno.id}
-                                  onClick={(e) => {
+                                  onClick={handleClickTurno}
+                                  onMouseDown={(e) => {
+                                    // Prevenir que el click en el día se active
                                     e.stopPropagation();
-                                    onAbrirModalTurno(turno);
                                   }}
+                                  data-testid={`turno-calendario-${turno.id}`}
+                                  data-turno-id={turno.id}
+                                  data-turno-hora={horaNormalizada}
+                                  data-turno-estado={turno.estado}
                                   className={`${colorEstado} border-2 text-[10px] sm:text-xs px-1.5 py-1 mb-0.5 rounded-md truncate cursor-pointer hover:opacity-90 hover:shadow-md font-bold shadow-sm transition-all`}
-                                  title={`${nombrePaciente} ${apellidoPaciente} - ${turno.hora} - ${turno.estado}`}
+                                  title={`${nombrePaciente} ${apellidoPaciente} - ${horaNormalizada} - ${turno.estado}`}
+                                  role="button"
+                                  tabIndex={0}
+                                  onKeyDown={(e) => {
+                                    // Permitir abrir el modal con Enter o Espacio
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      if (onAbrirModalTurno) {
+                                        onAbrirModalTurno(turno);
+                                      }
+                                    }
+                                  }}
                                 >
-                                  {turno.hora} {nombrePaciente.split(' ')[0]}
+                                  {horaNormalizada} {nombrePaciente.split(' ')[0]}
                                 </div>
                               );
                             })}

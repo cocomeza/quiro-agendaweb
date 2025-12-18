@@ -37,7 +37,15 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
     if (turno) {
       setPacienteId(turno.paciente_id);
       setHora(turno.hora);
-      setFechaTurno(new Date(turno.fecha));
+      // Validar y crear la fecha de forma segura
+      const fechaTurnoDate = turno.fecha ? new Date(turno.fecha) : new Date();
+      // Verificar que la fecha sea válida
+      if (isNaN(fechaTurnoDate.getTime())) {
+        console.error('Fecha inválida recibida:', turno.fecha);
+        setFechaTurno(fecha); // Usar la fecha por defecto si es inválida
+      } else {
+        setFechaTurno(fechaTurnoDate);
+      }
       setEstado(turno.estado as 'programado' | 'completado' | 'cancelado');
       setPago(turno.pago || 'impago');
       setNotas(turno.notas || '');
@@ -79,6 +87,11 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
     setIsSubmitting(true);
 
     try {
+      // Validar que la fecha sea válida antes de formatearla
+      if (isNaN(fechaTurno.getTime())) {
+        setError('La fecha seleccionada no es válida');
+        return;
+      }
       const fechaStr = format(fechaTurno, 'yyyy-MM-dd');
 
       if (turno) {
@@ -122,7 +135,8 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
         
         // Mensaje informativo si se cambió la fecha o hora
         if (fechaCambio || horaCambio) {
-          showSuccess(`✅ Turno actualizado exitosamente. El slot anterior (${format(new Date(fechaOriginal), 'dd/MM/yyyy')} ${horaOriginal}) quedó liberado.`);
+          const fechaOriginalFormateada = fechaOriginal ? format(new Date(fechaOriginal), 'dd/MM/yyyy') : '';
+          showSuccess(`✅ Turno actualizado exitosamente. El slot anterior (${fechaOriginalFormateada} ${horaOriginal}) quedó liberado.`);
         } else {
           showSuccess('✅ Turno actualizado exitosamente');
         }
@@ -148,6 +162,8 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
         showSuccess('✅ Turno creado exitosamente');
       }
 
+      // Cerrar el modal después de guardar exitosamente
+      // El estado de loading se reseteará en el finally block
       onClose();
     } catch (err: any) {
       const errorMessage = obtenerMensajeError(err);
@@ -167,12 +183,13 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
       ? `${pacienteNombre.nombre} ${pacienteNombre.apellido}`
       : 'este paciente';
     
-    const confirmacion = window.confirm(
-      `¿Estás seguro de que deseas eliminar el turno de ${nombreCompleto}?\n\n` +
-      `Fecha: ${format(new Date(turno.fecha), 'dd/MM/yyyy')}\n` +
-      `Hora: ${turno.hora}\n\n` +
-      '⚠️ Esta acción NO se puede deshacer.'
-    );
+      const fechaFormateada = turno.fecha ? format(new Date(turno.fecha), 'dd/MM/yyyy') : 'Fecha no disponible';
+      const confirmacion = window.confirm(
+        `¿Estás seguro de que deseas eliminar el turno de ${nombreCompleto}?\n\n` +
+        `Fecha: ${fechaFormateada}\n` +
+        `Hora: ${turno.hora}\n\n` +
+        '⚠️ Esta acción NO se puede deshacer.'
+      );
     
     if (!confirmacion) {
       return;
@@ -198,10 +215,19 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4"
+      data-testid="modal-turno-overlay"
+    >
+      <div 
+        className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
+        data-testid="modal-turno"
+      >
         <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+          <h2 
+            className="text-lg sm:text-xl font-semibold text-gray-900"
+            data-testid="modal-turno-titulo"
+          >
             {turno ? 'Editar Turno' : 'Nuevo Turno'}
           </h2>
           <button
@@ -284,9 +310,9 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
               min={turno ? undefined : format(fecha, 'yyyy-MM-dd')}
               className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 font-medium"
             />
-            {turno && format(fechaTurno, 'yyyy-MM-dd') !== fechaOriginal && (
+            {turno && !isNaN(fechaTurno.getTime()) && format(fechaTurno, 'yyyy-MM-dd') !== fechaOriginal && (
               <p className="mt-1 text-xs text-indigo-600">
-                ℹ️ El slot original ({format(new Date(fechaOriginal), 'dd/MM/yyyy')} {horaOriginal}) quedará disponible
+                ℹ️ El slot original ({fechaOriginal ? format(new Date(fechaOriginal), 'dd/MM/yyyy') : ''} {horaOriginal}) quedará disponible
               </p>
             )}
           </div>
@@ -309,7 +335,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
                 </option>
               ))}
             </select>
-            {turno && hora !== horaOriginal && format(fechaTurno, 'yyyy-MM-dd') === fechaOriginal && (
+            {turno && hora !== horaOriginal && !isNaN(fechaTurno.getTime()) && format(fechaTurno, 'yyyy-MM-dd') === fechaOriginal && (
               <p className="mt-1 text-xs text-indigo-600">
                 ℹ️ El slot original ({horaOriginal}) quedará disponible
               </p>
