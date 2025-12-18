@@ -187,7 +187,7 @@ export default function ListaPacientes({
             placeholder="Buscar por nombre, apellido, email o número de ficha..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+            className="w-full pl-10 pr-4 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-medium"
           />
         </div>
       </div>

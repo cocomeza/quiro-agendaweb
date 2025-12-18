@@ -50,7 +50,7 @@ export default function BusquedaRapida({
           }}
           onFocus={() => setMostrarResultados(true)}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-3 text-base border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full pl-10 pr-10 py-3 text-base border-2 border-gray-400 rounded-lg bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium"
         />
         {busqueda && (
           <button

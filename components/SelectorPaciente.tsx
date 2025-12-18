@@ -115,7 +115,7 @@ export default function SelectorPaciente({
           placeholder={pacienteSeleccionado ? `${pacienteSeleccionado.nombre} ${pacienteSeleccionado.apellido}` : placeholder}
           required={required}
           disabled={disabled}
-          className="w-full pl-10 pr-10 py-2.5 text-sm sm:text-base border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 font-medium disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className="w-full pl-10 pr-10 py-2.5 text-sm sm:text-base border-2 border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 placeholder:text-gray-500 font-medium disabled:bg-gray-50 disabled:text-gray-700 disabled:cursor-not-allowed"
         />
         {(busqueda || value) && !disabled && (
           <button
