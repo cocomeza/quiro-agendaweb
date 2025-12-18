@@ -25,7 +25,8 @@
     "migrate:all": "npm run migrate:run && npm run migrate:appointments",
     "test:login": "tsx scripts/test-login.ts",
     "validate:env": "tsx scripts/validate-env.ts",
-    "diagnose": "tsx scripts/diagnose.ts"
+    "diagnose": "tsx scripts/diagnose.ts",
+    "clean:test-pacientes": "tsx scripts/eliminar-pacientes-test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",

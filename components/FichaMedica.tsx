@@ -500,13 +500,31 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
           )}
 
           {/* Información clínica para impresión */}
-          {(motivoConsulta || diagnostico || planTratamiento) && (
+          {(motivoConsulta || antecedentesMedicos || medicamentosActuales || alergias || diagnostico || planTratamiento || observacionesMedicas) && (
             <div className="mb-6">
               <h3 className="text-lg font-bold mb-4 border-b border-gray-300 pb-2">INFORMACIÓN CLÍNICA</h3>
               {motivoConsulta && (
                 <div className="mb-3">
                   <strong>Motivo de Consulta:</strong>
                   <p className="whitespace-pre-wrap">{motivoConsulta}</p>
+                </div>
+              )}
+              {antecedentesMedicos && (
+                <div className="mb-3">
+                  <strong>Antecedentes Médicos:</strong>
+                  <p className="whitespace-pre-wrap">{antecedentesMedicos}</p>
+                </div>
+              )}
+              {medicamentosActuales && (
+                <div className="mb-3">
+                  <strong>Medicamentos Actuales:</strong>
+                  <p className="whitespace-pre-wrap">{medicamentosActuales}</p>
+                </div>
+              )}
+              {alergias && (
+                <div className="mb-3">
+                  <strong>Alergias:</strong>
+                  <p className="whitespace-pre-wrap">{alergias}</p>
                 </div>
               )}
               {diagnostico && (
@@ -516,9 +534,15 @@ export default function FichaMedica({ paciente, onClose }: FichaMedicaProps) {
                 </div>
               )}
               {planTratamiento && (
-                <div>
+                <div className="mb-3">
                   <strong>Plan de Tratamiento:</strong>
                   <p className="whitespace-pre-wrap">{planTratamiento}</p>
+                </div>
+              )}
+              {observacionesMedicas && (
+                <div>
+                  <strong>Observaciones Médicas:</strong>
+                  <p className="whitespace-pre-wrap">{observacionesMedicas}</p>
                 </div>
               )}
             </div>
