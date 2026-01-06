@@ -50,14 +50,19 @@ export default function LoginForm() {
       const result = await response.json();
 
       if (!response.ok) {
-        // Mensajes de error más amigables
-        if (result.error?.includes('Invalid login credentials') || result.error?.includes('incorrect')) {
-          setError('Email o contraseña incorrectos. Verifica tus credenciales.');
-        } else if (result.error?.includes('Email not confirmed')) {
-          setError('Tu email no está confirmado. Verifica tu correo o contacta al administrador.');
-        } else {
-          setError(result.error || 'Error al iniciar sesión. Intenta nuevamente.');
+        // El mensaje de error ya viene formateado desde el servidor
+        const errorMessage = result.error || 'Error al iniciar sesión. Intenta nuevamente.';
+        setError(errorMessage);
+        
+        // En desarrollo, mostrar información adicional de depuración
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[LoginForm] Error de login:', {
+            status: response.status,
+            error: result.error,
+            response: result,
+          });
         }
+        
         setLoading(false);
         return;
       }

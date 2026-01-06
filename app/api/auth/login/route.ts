@@ -4,6 +4,15 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
+    // Validar variables de entorno
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.error('[Login API] Variables de entorno faltantes');
+      return NextResponse.json(
+        { error: 'Error de configuración del servidor. Contacta al administrador.' },
+        { status: 500 }
+      );
+    }
+
     const { email, password } = await request.json();
 
     if (!email || !password) {
@@ -15,29 +24,23 @@ export async function POST(request: Request) {
 
     const cookieStore = await cookies();
     
+    // Array para almacenar las cookies que se establecerán
+    const cookiesToSet: Array<{ name: string; value: string; options?: any }> = [];
+    
     // Crear cliente de Supabase en el servidor
     const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       {
         cookies: {
           getAll() {
             return cookieStore.getAll();
           },
-          setAll(cookiesToSet) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) => {
-                cookieStore.set(name, value, {
-                  ...options,
-                  path: '/',
-                  sameSite: 'lax',
-                  httpOnly: options?.httpOnly ?? false,
-                  secure: options?.secure ?? false,
-                });
-              });
-            } catch (error) {
-              // Ignorar errores de cookies en Server Components
-            }
+          setAll(cookiesToSetFromSupabase) {
+            // Almacenar las cookies para establecerlas después en la respuesta
+            cookiesToSetFromSupabase.forEach(({ name, value, options }) => {
+              cookiesToSet.push({ name, value, options });
+            });
           },
         },
       }
@@ -50,10 +53,36 @@ export async function POST(request: Request) {
     });
 
     if (error) {
-      // Logger removido - no loggear información sensible en producción
+      // Proporcionar mensajes de error más descriptivos
+      let errorMessage = 'Error al iniciar sesión';
+      let statusCode = 401;
+
+      if (error.message.includes('Invalid login credentials') || error.message.includes('incorrect')) {
+        errorMessage = 'Email o contraseña incorrectos. Verifica tus credenciales.';
+      } else if (error.message.includes('Email not confirmed')) {
+        errorMessage = 'Tu email no está confirmado. Verifica tu correo o contacta al administrador.';
+        statusCode = 403;
+      } else if (error.message.includes('User not found')) {
+        errorMessage = 'Usuario no encontrado. Verifica que el email sea correcto.';
+      } else if (error.message.includes('Too many requests')) {
+        errorMessage = 'Demasiados intentos. Por favor espera unos minutos antes de intentar nuevamente.';
+        statusCode = 429;
+      } else {
+        errorMessage = error.message || 'Error al iniciar sesión';
+      }
+
+      // Log solo en desarrollo para debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[Login API] Error de autenticación:', {
+          message: error.message,
+          status: error.status,
+          email: email.trim().substring(0, 3) + '***', // Solo primeros 3 caracteres para debugging
+        });
+      }
+
       return NextResponse.json(
-        { error: error.message || 'Error al iniciar sesión' },
-        { status: 401 }
+        { error: errorMessage },
+        { status: statusCode }
       );
     }
 
@@ -64,8 +93,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Crear respuesta con éxito
-    // Las cookies ya fueron establecidas automáticamente por Supabase SSR en setAll
+    // Crear respuesta con éxito y establecer las cookies
     const response = NextResponse.json({
       success: true,
       user: {
@@ -74,22 +102,15 @@ export async function POST(request: Request) {
       },
     });
 
-    // Copiar las cookies establecidas por Supabase a la respuesta
-    const allCookies = cookieStore.getAll();
-    allCookies.forEach(cookie => {
-      if (cookie.name.startsWith('sb-')) {
-        try {
-          response.cookies.set(cookie.name, cookie.value, {
-            path: '/',
-            sameSite: 'lax',
-            httpOnly: false,
-            secure: false,
-          });
-        } catch (err) {
-          // Ignorar errores al establecer cookies silenciosamente
-          // En producción, esto podría loggearse a un servicio de monitoreo
-        }
-      }
+    // Establecer todas las cookies de Supabase en la respuesta
+    cookiesToSet.forEach(({ name, value, options }) => {
+      response.cookies.set(name, value, {
+        path: options?.path || '/',
+        sameSite: (options?.sameSite as 'lax' | 'strict' | 'none') || 'lax',
+        httpOnly: options?.httpOnly ?? false,
+        secure: options?.secure ?? false,
+        maxAge: options?.maxAge,
+      });
     });
 
     return response;

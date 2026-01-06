@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, getDay } from 'date-fns';
+import { useState, useEffect } from 'react';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday, addMonths, subMonths, getDay, isValid } from 'date-fns';
 import { es } from 'date-fns/locale/es';
 import type { TurnoConPaciente, Paciente } from '@/lib/supabase/types';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { validarFecha, obtenerAño } from '@/lib/utils-fechas';
 
 interface VistaCalendarioProps {
   turnos: TurnoConPaciente[];
@@ -21,45 +22,103 @@ export default function VistaCalendario({
   onAbrirModalTurno,
   loading,
 }: VistaCalendarioProps) {
-  const [mesActual, setMesActual] = useState(startOfMonth(fechaSeleccionada));
+  // Validar que la fecha seleccionada sea válida
+  const fechaValida = isValid(fechaSeleccionada) && validarFecha(fechaSeleccionada) 
+    ? fechaSeleccionada 
+    : new Date();
+  
+  const [mesActual, setMesActual] = useState(startOfMonth(fechaValida));
+
+  // Sincronizar mesActual cuando cambia fechaSeleccionada
+  useEffect(() => {
+    if (isValid(fechaSeleccionada) && validarFecha(fechaSeleccionada)) {
+      const nuevoMes = startOfMonth(fechaSeleccionada);
+      if (nuevoMes.getTime() !== mesActual.getTime()) {
+        setMesActual(nuevoMes);
+      }
+    }
+  }, [fechaSeleccionada]);
 
   const mesAnterior = () => {
-    setMesActual(subMonths(mesActual, 1));
+    const nuevoMes = subMonths(mesActual, 1);
+    if (validarFecha(nuevoMes)) {
+      setMesActual(nuevoMes);
+    }
   };
 
   const mesSiguiente = () => {
-    setMesActual(addMonths(mesActual, 1));
+    const nuevoMes = addMonths(mesActual, 1);
+    if (validarFecha(nuevoMes)) {
+      setMesActual(nuevoMes);
+    }
   };
 
   const irAHoy = () => {
     const hoy = new Date();
-    setMesActual(startOfMonth(hoy));
-    onSeleccionarFecha(hoy);
+    if (validarFecha(hoy)) {
+      const inicioMesHoy = startOfMonth(hoy);
+      setMesActual(inicioMesHoy);
+      onSeleccionarFecha(hoy);
+    }
   };
 
+  // Validar que mesActual sea válido antes de continuar
+  if (!isValid(mesActual) || !validarFecha(mesActual)) {
+    console.error('Mes actual inválido, usando fecha actual');
+    const hoy = new Date();
+    if (validarFecha(hoy)) {
+      setMesActual(startOfMonth(hoy));
+    }
+    // Continuar con el renderizado usando la fecha actual como fallback
+  }
+
   // Obtener todos los días del mes
+  const inicioMes = startOfMonth(mesActual);
+  const finMes = endOfMonth(mesActual);
   const diasDelMes = eachDayOfInterval({
-    start: startOfMonth(mesActual),
-    end: endOfMonth(mesActual),
+    start: inicioMes,
+    end: finMes,
   });
 
   // Obtener días del mes anterior para completar la primera semana
-  const primerDia = getDay(startOfMonth(mesActual));
+  // getDay() devuelve: 0=Domingo, 1=Lunes, 2=Martes, etc.
+  const diaSemanaPrimerDia = getDay(inicioMes); // 0=Domingo, 1=Lunes, etc.
   const diasAnteriores = [];
-  for (let i = primerDia - 1; i >= 0; i--) {
-    const fecha = new Date(mesActual);
-    fecha.setDate(fecha.getDate() - i - 1);
-    diasAnteriores.push(fecha);
+  
+  // Si el primer día no es domingo (0), necesitamos agregar días anteriores
+  // para completar la semana empezando en domingo
+  // Ejemplo: Si el primer día es martes (2), necesitamos lunes (1) y domingo (0)
+  for (let i = 1; i <= diaSemanaPrimerDia; i++) {
+    const fecha = new Date(inicioMes);
+    fecha.setDate(fecha.getDate() - i);
+    if (validarFecha(fecha)) {
+      diasAnteriores.unshift(fecha); // Agregar al inicio para mantener orden cronológico
+    }
   }
 
   // Obtener días del mes siguiente para completar la última semana
-  const ultimoDia = getDay(endOfMonth(mesActual));
+  const diaSemanaUltimoDia = getDay(finMes); // 0=Domingo, 1=Lunes, etc.
   const diasSiguientes = [];
-  const diasFaltantes = 6 - ultimoDia;
+  
+  // Calcular cuántos días faltan para completar la semana (hasta sábado = 6)
+  const diasFaltantes = 6 - diaSemanaUltimoDia;
   for (let i = 1; i <= diasFaltantes; i++) {
-    const fecha = new Date(endOfMonth(mesActual));
+    const fecha = new Date(finMes);
     fecha.setDate(fecha.getDate() + i);
-    diasSiguientes.push(fecha);
+    if (validarFecha(fecha)) {
+      diasSiguientes.push(fecha);
+    }
+  }
+
+  // Combinar todos los días en una sola lista para renderizar en una sola grilla
+  const todosLosDias = [...diasAnteriores, ...diasDelMes, ...diasSiguientes];
+
+  // Validar que el año se muestre correctamente (debug en desarrollo)
+  if (process.env.NODE_ENV === 'development') {
+    const añoActual = obtenerAño(mesActual);
+    if (añoActual < 2020 || añoActual > 2100) {
+      console.warn(`Año fuera del rango esperado: ${añoActual}`);
+    }
   }
 
   // Contar turnos por día
@@ -92,7 +151,7 @@ export default function VistaCalendario({
             </button>
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <Calendar className="w-5 h-5 text-gray-500 flex-shrink-0" />
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 truncate" title={`${format(mesActual, 'MMMM yyyy', { locale: es })} - Año ${obtenerAño(mesActual)}`}>
                 {format(mesActual, 'MMMM yyyy', { locale: es })}
               </h2>
             </div>
@@ -134,59 +193,66 @@ export default function VistaCalendario({
               ))}
             </div>
 
-            {/* Días del mes anterior (grises) */}
-            {diasAnteriores.length > 0 && (
-              <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-1">
-                {diasAnteriores.map((dia, index) => (
-                  <div
-                    key={`prev-${index}`}
-                    className="aspect-square p-1 sm:p-2 text-gray-400 text-xs sm:text-sm"
-                  >
-                    {format(dia, 'd')}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Días del mes actual */}
+            {/* Todos los días del calendario en una sola grilla */}
             <div className="grid grid-cols-7 gap-1 sm:gap-2">
-              {diasDelMes.map((dia) => {
-                const turnosDelDia = obtenerTurnosDelDia(dia);
-                const cantidadTurnos = turnosDelDia.length;
-                const esHoy = isToday(dia);
-                const esSeleccionado = isSameDay(dia, fechaSeleccionada);
-                const esDelMesActual = isSameMonth(dia, mesActual);
+              {todosLosDias
+                .filter(dia => isValid(dia) && validarFecha(dia)) // Filtrar fechas inválidas
+                .map((dia, index) => {
+                  const turnosDelDia = obtenerTurnosDelDia(dia);
+                  const cantidadTurnos = turnosDelDia.length;
+                  const esHoy = isToday(dia);
+                  const esSeleccionado = isSameDay(dia, fechaSeleccionada);
+                  const esDelMesActual = isSameMonth(dia, mesActual);
+                  
+                  // Validar que el día de la semana sea correcto (solo en desarrollo)
+                  // Nota: Esta validación verifica que los días estén alineados correctamente
+                  if (process.env.NODE_ENV === 'development' && esDelMesActual && index < todosLosDias.length) {
+                    const diaSemanaReal = getDay(dia);
+                    // El primer día del mes debería estar en la posición correcta según su día de la semana
+                    if (index === diasAnteriores.length) {
+                      const diaSemanaEsperado = getDay(startOfMonth(mesActual));
+                      if (diaSemanaReal !== diaSemanaEsperado) {
+                        console.warn(`Desalineación en primer día del mes: fecha ${format(dia, 'yyyy-MM-dd')}, día semana real: ${diaSemanaReal}, esperado: ${diaSemanaEsperado}`);
+                      }
+                    }
+                  }
 
                 return (
                   <div
                     key={dia.toISOString()}
                     onClick={(e) => {
-                      // Solo seleccionar fecha si el click no viene de un turno
+                      // Solo seleccionar fecha si el click no viene de un turno y es del mes actual
                       if (esDelMesActual && !(e.target as HTMLElement).closest('[data-testid^="turno-calendario-"]')) {
                         onSeleccionarFecha(dia);
                       }
                     }}
-                    className={`aspect-square p-1 sm:p-2 border rounded-md transition cursor-pointer ${
+                    className={`aspect-square p-1 sm:p-2 border rounded-md transition ${
+                      esDelMesActual ? 'cursor-pointer' : ''
+                    } ${
                       esSeleccionado
                         ? 'bg-indigo-100 border-indigo-500 ring-2 ring-indigo-200'
                         : esHoy
                         ? 'bg-blue-50 border-blue-300'
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        : esDelMesActual
+                        ? 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        : 'border-transparent'
                     } ${!esDelMesActual ? 'opacity-50' : ''}`}
                   >
                     <div className="flex flex-col h-full">
                       <div
                         className={`text-sm sm:text-base font-bold ${
                           esSeleccionado
-                            ? 'text-white'
+                            ? 'text-indigo-900'
                             : esHoy
                             ? 'text-blue-900'
-                            : 'text-gray-900'
+                            : esDelMesActual
+                            ? 'text-gray-900'
+                            : 'text-gray-400'
                         }`}
                       >
                         {format(dia, 'd')}
                       </div>
-                      {cantidadTurnos > 0 && (
+                      {cantidadTurnos > 0 && esDelMesActual && (
                         <div className="flex-1 flex items-end mt-1">
                           <div className="w-full">
                             {turnosDelDia.slice(0, 3).map((turno, idx) => {
@@ -260,20 +326,6 @@ export default function VistaCalendario({
                 );
               })}
             </div>
-
-            {/* Días del mes siguiente (grises) */}
-            {diasSiguientes.length > 0 && (
-              <div className="grid grid-cols-7 gap-1 sm:gap-2 mt-1">
-                {diasSiguientes.map((dia, index) => (
-                  <div
-                    key={`next-${index}`}
-                    className="aspect-square p-1 sm:p-2 text-gray-400 text-xs sm:text-sm"
-                  >
-                    {format(dia, 'd')}
-                  </div>
-                ))}
-              </div>
-            )}
 
             {/* Leyenda */}
             <div className="mt-4 sm:mt-6 pt-4 border-t border-gray-200">
