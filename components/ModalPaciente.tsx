@@ -210,7 +210,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
               maxLength={100}
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
             />
           </div>
 
@@ -225,7 +225,22 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
               maxLength={100}
               value={apellido}
               onChange={(e) => setApellido(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="apellido" className="block text-sm font-medium text-gray-700 mb-1">
+              Apellido *
+            </label>
+            <input
+              id="apellido"
+              type="text"
+              required
+              maxLength={100}
+              value={apellido}
+              onChange={(e) => setApellido(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
             />
           </div>
 
@@ -239,7 +254,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
               maxLength={20}
               value={telefono}
               onChange={(e) => setTelefono(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
             />
           </div>
 
@@ -253,7 +268,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
               maxLength={255}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-medium"
             />
           </div>
 
@@ -267,7 +282,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
               maxLength={20}
               value={dni}
               onChange={(e) => setDni(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder:text-gray-600 placeholder:font-medium text-gray-900 font-medium"
               placeholder="Ej: 12345678"
             />
           </div>
@@ -282,13 +297,13 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
               max={new Date().toISOString().split('T')[0]}
               value={fechaNacimiento}
               onChange={(e) => setFechaNacimiento(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 font-semibold bg-white"
             />
           </div>
 
           <div>
             <label htmlFor="numeroFicha" className="block text-sm font-medium text-gray-700 mb-1">
-              Número de Ficha {!paciente && <span className="text-xs text-gray-500 font-normal">(auto-generado)</span>}
+              Número de Ficha {!paciente && <span className="text-xs text-gray-600 font-medium">(auto-generado)</span>}
             </label>
             <input
               id="numeroFicha"
@@ -315,7 +330,7 @@ export default function ModalPaciente({ paciente, onClose, onAbrirFichaMedica }:
               maxLength={1000}
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder:text-gray-600 placeholder:font-medium text-gray-900 font-medium"
               placeholder="Notas sobre el paciente..."
             />
           </div>

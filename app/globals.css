@@ -58,6 +58,57 @@ input, select, textarea {
   font-size: 16px; /* Previene zoom en iOS */
 }
 
+/* Mejorar contraste y nitidez de placeholders */
+input::placeholder,
+textarea::placeholder {
+  color: #4b5563; /* gray-600 - mejor contraste que gray-500 */
+  font-weight: 500; /* font-medium para mejor legibilidad */
+  opacity: 1; /* Asegurar opacidad completa */
+}
+
+/* Mejorar contraste de inputs de tipo date y time */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  color: #111827 !important; /* gray-900 - máximo contraste */
+  font-weight: 600 !important; /* font-semibold para mejor legibilidad */
+  background-color: #ffffff !important; /* Asegurar fondo blanco */
+}
+
+/* Mejorar contraste del texto mostrado en el calendario del input date */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 1;
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: #111827 !important; /* gray-900 - máximo contraste */
+  font-weight: 600 !important; /* font-semibold */
+  padding: 0 2px;
+}
+
+/* Para Firefox */
+input[type="date"] {
+  color: #111827 !important;
+  font-weight: 600 !important;
+}
+
+/* Mejorar contraste de labels */
+label {
+  color: #374151; /* gray-700 - mejor contraste */
+  font-weight: 500; /* font-medium */
+}
+
+/* Mejorar nitidez de textos en general */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 /* Estilos para impresión */
 @media print {
   @page {

@@ -115,7 +115,7 @@ export default function SelectorPaciente({
           placeholder={pacienteSeleccionado ? `${pacienteSeleccionado.nombre} ${pacienteSeleccionado.apellido}` : placeholder}
           required={required}
           disabled={disabled}
-          className="w-full pl-10 pr-10 py-2.5 text-sm sm:text-base border-2 border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 placeholder:text-gray-500 font-medium disabled:bg-gray-50 disabled:text-gray-700 disabled:cursor-not-allowed"
+          className="w-full pl-10 pr-10 py-2.5 text-sm sm:text-base border-2 border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 placeholder:text-gray-600 placeholder:font-medium font-medium disabled:bg-gray-50 disabled:text-gray-700 disabled:cursor-not-allowed"
         />
         {(busqueda || value) && !disabled && (
           <button
@@ -157,7 +157,7 @@ export default function SelectorPaciente({
             </button>
           ))}
           {resultados.length === 15 && busqueda && (
-            <div className="px-4 py-2 text-xs text-gray-500 text-center border-t border-gray-100">
+            <div className="px-4 py-2 text-xs text-gray-600 text-center border-t border-gray-100 font-medium">
               Mostrando 15 resultados. Refina tu búsqueda para más opciones.
             </div>
           )}
@@ -165,7 +165,7 @@ export default function SelectorPaciente({
       )}
 
       {mostrarResultados && busqueda && resultados.length === 0 && (
-        <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-500">
+        <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-600 font-medium">
           No se encontraron pacientes
         </div>
       )}

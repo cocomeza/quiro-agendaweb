@@ -50,7 +50,7 @@ export default function BusquedaRapida({
           }}
           onFocus={() => setMostrarResultados(true)}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-3 text-base border-2 border-gray-400 rounded-lg bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium"
+          className="w-full pl-10 pr-10 py-3 text-base border-2 border-gray-400 rounded-lg bg-white text-gray-900 placeholder:text-gray-600 placeholder:font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium"
         />
         {busqueda && (
           <button
@@ -85,7 +85,7 @@ export default function BusquedaRapida({
       )}
 
       {mostrarResultados && busqueda && resultados.length === 0 && (
-        <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-500">
+        <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg p-4 text-center text-gray-600 font-medium">
           No se encontraron pacientes
         </div>
       )}

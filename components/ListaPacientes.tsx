@@ -187,7 +187,7 @@ export default function ListaPacientes({
             placeholder="Buscar por nombre, apellido, email o número de ficha..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-medium"
+            className="w-full pl-10 pr-4 py-2 border-2 border-gray-400 rounded-md bg-white text-gray-900 placeholder:text-gray-600 placeholder:font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-medium"
           />
         </div>
       </div>
@@ -201,7 +201,7 @@ export default function ListaPacientes({
           </div>
         ) : pacientesFiltrados.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-gray-500 text-lg mb-4">
+            <p className="text-gray-600 text-lg mb-4 font-medium">
               {busqueda ? 'No se encontraron pacientes con ese criterio' : 'No hay pacientes registrados'}
             </p>
             {!busqueda && (
@@ -339,7 +339,7 @@ export default function ListaPacientes({
                       {/* Notas (si existen) */}
                       {paciente.notas && (
                         <div className="mt-3 ml-14 pt-3 border-t border-gray-200">
-                          <p className="text-xs text-gray-500 line-clamp-2 italic">
+                          <p className="text-xs text-gray-600 line-clamp-2 italic font-medium">
                             {paciente.notas}
                           </p>
                         </div>
@@ -404,7 +404,7 @@ export default function ListaPacientes({
                           </div>
                         )}
                         {turnosPacientes[paciente.id] && turnosPacientes[paciente.id].length === 0 && (
-                          <p className="text-xs text-gray-500 italic">No hay turnos futuros pendientes</p>
+                          <p className="text-xs text-gray-600 italic font-medium">No hay turnos futuros pendientes</p>
                         )}
                       </div>
                     </div>

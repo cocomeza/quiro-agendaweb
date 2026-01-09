@@ -339,7 +339,7 @@ export default function AgendaDiaria({
                       console.error('Error al cambiar fecha:', error);
                     }
                   }}
-                  className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-600 text-sm font-medium"
+                  className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-600 text-sm font-semibold text-gray-900 bg-white"
                 />
                 <div className="flex gap-2">
                   <button
@@ -377,7 +377,7 @@ export default function AgendaDiaria({
                 <Calendar className="w-10 h-10 text-gray-400" />
               </div>
               <p className="text-gray-700 text-lg font-semibold mb-2">No hay turnos pendientes</p>
-              <p className="text-gray-500 text-sm mb-6">Comienza agregando un turno para este día</p>
+              <p className="text-gray-600 text-sm mb-6 font-medium">Comienza agregando un turno para este día</p>
               <button
                 onClick={() => onAbrirModalTurno()}
                 className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold shadow-md hover:shadow-lg"

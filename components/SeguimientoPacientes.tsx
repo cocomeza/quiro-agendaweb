@@ -252,7 +252,7 @@ export default function SeguimientoPacientes() {
       {/* Header */}
       <div className="border-b px-4 sm:px-6 py-4 bg-gradient-to-r from-indigo-50 to-blue-50">
         <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">📞 Seguimiento de Pacientes</h2>
-        <p className="text-sm text-gray-700">
+        <p className="text-sm text-gray-800 font-medium">
           Encuentra pacientes que necesitan atención: recordatorios de visitas, seguimiento de cancelaciones y pacientes sin turno programado.
         </p>
       </div>
@@ -268,8 +268,8 @@ export default function SeguimientoPacientes() {
                 : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
             }`}
           >
-            <div className="text-base mb-1">🔄 Recordar Visita</div>
-            <div className="text-xs opacity-90">Última visita hace 18-28 días</div>
+            <div className="text-base mb-1 font-bold">🔄 Recordar Visita</div>
+            <div className="text-xs font-semibold opacity-100">Última visita hace 18-28 días</div>
           </button>
           
           <button
@@ -277,11 +277,11 @@ export default function SeguimientoPacientes() {
             className={`px-4 py-3 rounded-lg text-sm font-semibold transition-all shadow-sm ${
               filtroActivo === 'no_vienen_hace_tiempo'
                 ? 'bg-orange-600 text-white shadow-md'
-                : 'bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200'
+                : 'bg-orange-50 text-orange-800 hover:bg-orange-100 border-2 border-orange-300'
             }`}
           >
-            <div className="text-base mb-1">⏰ No Vienen Hace Tiempo</div>
-            <div className="text-xs opacity-90">Más de 30 días sin venir</div>
+            <div className="text-base mb-1 font-bold">⏰ No Vienen Hace Tiempo</div>
+            <div className="text-xs font-semibold opacity-100">Más de 30 días sin venir</div>
           </button>
           
           <button
@@ -289,11 +289,11 @@ export default function SeguimientoPacientes() {
             className={`px-4 py-3 rounded-lg text-sm font-semibold transition-all shadow-sm ${
               filtroActivo === 'cancelaron_recientemente'
                 ? 'bg-red-600 text-white shadow-md'
-                : 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200'
+                : 'bg-red-50 text-red-800 hover:bg-red-100 border-2 border-red-300'
             }`}
           >
-            <div className="text-base mb-1">❌ Cancelaron Recientemente</div>
-            <div className="text-xs opacity-90">Cancelaron en últimos 20 días</div>
+            <div className="text-base mb-1 font-bold">❌ Cancelaron Recientemente</div>
+            <div className="text-xs font-semibold opacity-100">Cancelaron en últimos 20 días</div>
           </button>
           
           <button
@@ -301,11 +301,11 @@ export default function SeguimientoPacientes() {
             className={`px-4 py-3 rounded-lg text-sm font-semibold transition-all shadow-sm ${
               filtroActivo === 'sin_turno_programado'
                 ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
+                : 'bg-blue-50 text-blue-800 hover:bg-blue-100 border-2 border-blue-300'
             }`}
           >
-            <div className="text-base mb-1">📅 Sin Turno Programado</div>
-            <div className="text-xs opacity-90">Activos pero sin próximo turno</div>
+            <div className="text-base mb-1 font-bold">📅 Sin Turno Programado</div>
+            <div className="text-xs font-semibold opacity-100">Activos pero sin próximo turno</div>
           </button>
         </div>
         
@@ -315,7 +315,7 @@ export default function SeguimientoPacientes() {
               <p className="text-sm font-medium text-gray-700">
                 📋 Mostrando <span className="font-bold text-indigo-600">{pacientes.length}</span> paciente{pacientes.length !== 1 ? 's' : ''}
               </p>
-              <p className="text-xs text-gray-600 italic">
+              <p className="text-xs text-gray-800 font-semibold italic">
                 {filtroActivo === 'recordar_visita' && '💡 Llama para recordarles que vuelvan'}
                 {filtroActivo === 'no_vienen_hace_tiempo' && '💡 Contacta para re-engancharlos'}
                 {filtroActivo === 'cancelaron_recientemente' && '💡 Pregunta el motivo de la cancelación'}
@@ -334,29 +334,29 @@ export default function SeguimientoPacientes() {
             <p className="text-gray-600 text-base">Cargando seguimiento...</p>
           </div>
         ) : pacientes.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
+          <div className="p-8 text-center text-gray-600 font-medium">
             {filtroActivo ? 'No hay pacientes que coincidan con el filtro' : 'No hay pacientes registrados'}
           </div>
         ) : (
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Paciente
                 </th>
-                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Teléfono
                 </th>
-                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Días Última Visita
                 </th>
-                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Turnos Anulados
                 </th>
-                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Días Último Anulado
                 </th>
-                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
@@ -374,7 +374,7 @@ export default function SeguimientoPacientes() {
                         {paciente.apellido}, {paciente.nombre}
                       </div>
                       {edad !== null && (
-                        <div className="text-xs text-gray-500">Edad: {edad} años</div>
+                        <div className="text-xs text-gray-800 font-semibold">Edad: {edad} años</div>
                       )}
                     </td>
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
@@ -394,7 +394,7 @@ export default function SeguimientoPacientes() {
                           }`}>
                             {diasUltimaVisita} días
                           </span>
-                          <div className="text-xs text-gray-500 mt-0.5">
+                          <div className="text-xs text-gray-600 mt-0.5 font-medium">
                             {format(new Date(paciente.ultima_visita!), 'dd/MM/yyyy')}
                           </div>
                         </div>
@@ -409,23 +409,23 @@ export default function SeguimientoPacientes() {
                             {paciente.turnos_cancelados_recientes} cancelación{paciente.turnos_cancelados_recientes !== 1 ? 'es' : ''}
                           </span>
                           {diasUltimoCancelado !== null && (
-                            <div className="text-xs text-gray-500 mt-0.5">
+                            <div className="text-xs text-gray-800 mt-0.5 font-semibold">
                               Hace {diasUltimoCancelado} días
                             </div>
                           )}
                         </div>
                       ) : (
-                        <span className="text-sm text-gray-400">Ninguna</span>
+                        <span className="text-sm text-gray-600 font-medium">Ninguna</span>
                       )}
                     </td>
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                       {pacientesConTurno.has(paciente.id) ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-200 text-green-900 border border-green-300">
                           ✓ Con turno
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                          ⚠ Sin turno
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-yellow-200 text-yellow-900 border border-yellow-300">
+                          ▲ Sin turno
                         </span>
                       )}
                     </td>

@@ -308,7 +308,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
                 setFechaTurno(nuevaFecha);
               }}
               min={turno ? undefined : format(fecha, 'yyyy-MM-dd')}
-              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 font-medium"
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 font-semibold"
             />
             {turno && !isNaN(fechaTurno.getTime()) && format(fechaTurno, 'yyyy-MM-dd') !== fechaOriginal && (
               <p className="mt-1 text-xs text-indigo-600">
@@ -391,7 +391,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
               maxLength={1000}
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
-              className="w-full px-4 py-2.5 text-sm sm:text-base border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 font-medium"
+              className="w-full px-4 py-2.5 text-sm sm:text-base border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 placeholder:text-gray-600 placeholder:font-medium font-medium"
               placeholder="Notas adicionales..."
             />
           </div>
