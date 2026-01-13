@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
+import { parsearFechaISO, parsearFechaISOSegura } from '@/lib/utils-fechas';
 import { createClient } from '@/lib/supabase/client';
 import type { Paciente, TurnoConPaciente, TurnoConPago } from '@/lib/supabase/types';
 import { X, User, FileText, Trash2 } from 'lucide-react';
@@ -33,12 +34,31 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
   const [horaOriginal, setHoraOriginal] = useState<string>('');
   const supabase = createClient();
 
+  // Función helper para formatear fecha original
+  const obtenerFechaOriginalFormateada = (): string => {
+    if (!fechaOriginal) return '';
+    const fechaOriginalDate = parsearFechaISOSegura(fechaOriginal);
+    return fechaOriginalDate && !isNaN(fechaOriginalDate.getTime())
+      ? format(fechaOriginalDate, 'dd/MM/yyyy')
+      : '';
+  };
+
   useEffect(() => {
     if (turno) {
       setPacienteId(turno.paciente_id);
       setHora(turno.hora);
-      // Validar y crear la fecha de forma segura
-      const fechaTurnoDate = turno.fecha ? new Date(turno.fecha) : new Date();
+      // Validar y crear la fecha de forma segura usando hora local
+      let fechaTurnoDate: Date;
+      if (turno.fecha) {
+        try {
+          fechaTurnoDate = parsearFechaISO(turno.fecha);
+        } catch (error) {
+          console.error('Error al parsear fecha:', error);
+          fechaTurnoDate = fecha; // Usar la fecha por defecto si falla
+        }
+      } else {
+        fechaTurnoDate = new Date();
+      }
       // Verificar que la fecha sea válida
       if (isNaN(fechaTurnoDate.getTime())) {
         console.error('Fecha inválida recibida:', turno.fecha);
@@ -135,7 +155,7 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
         
         // Mensaje informativo si se cambió la fecha o hora
         if (fechaCambio || horaCambio) {
-          const fechaOriginalFormateada = fechaOriginal ? format(new Date(fechaOriginal), 'dd/MM/yyyy') : '';
+          const fechaOriginalFormateada = obtenerFechaOriginalFormateada();
           showSuccess(`✅ Turno actualizado exitosamente. El slot anterior (${fechaOriginalFormateada} ${horaOriginal}) quedó liberado.`);
         } else {
           showSuccess('✅ Turno actualizado exitosamente');
@@ -183,7 +203,11 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
       ? `${pacienteNombre.nombre} ${pacienteNombre.apellido}`
       : 'este paciente';
     
-      const fechaFormateada = turno.fecha ? format(new Date(turno.fecha), 'dd/MM/yyyy') : 'Fecha no disponible';
+      // Parsear fecha como hora local para evitar problemas de zona horaria
+      const fechaDate = parsearFechaISOSegura(turno.fecha);
+      const fechaFormateada = fechaDate && !isNaN(fechaDate.getTime())
+        ? format(fechaDate, 'dd/MM/yyyy')
+        : 'Fecha no disponible';
       const confirmacion = window.confirm(
         `¿Estás seguro de que deseas eliminar el turno de ${nombreCompleto}?\n\n` +
         `Fecha: ${fechaFormateada}\n` +
@@ -304,15 +328,22 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
               type="date"
               value={format(fechaTurno, 'yyyy-MM-dd')}
               onChange={(e) => {
-                const nuevaFecha = new Date(e.target.value);
-                setFechaTurno(nuevaFecha);
+                // Parsear fecha como hora local para evitar problemas de zona horaria
+                const fechaStr = e.target.value;
+                if (fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                  const [año, mes, dia] = fechaStr.split('-').map(Number);
+                  const nuevaFecha = new Date(año, mes - 1, dia); // mes es 0-indexed
+                  setFechaTurno(nuevaFecha);
+                } else {
+                  setFechaTurno(new Date(e.target.value));
+                }
               }}
               min={turno ? undefined : format(fecha, 'yyyy-MM-dd')}
               className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-600 bg-white text-gray-900 font-semibold"
             />
             {turno && !isNaN(fechaTurno.getTime()) && format(fechaTurno, 'yyyy-MM-dd') !== fechaOriginal && (
               <p className="mt-1 text-xs text-indigo-600">
-                ℹ️ El slot original ({fechaOriginal ? format(new Date(fechaOriginal), 'dd/MM/yyyy') : ''} {horaOriginal}) quedará disponible
+                ℹ️ El slot original ({obtenerFechaOriginalFormateada()} {horaOriginal}) quedará disponible
               </p>
             )}
           </div>

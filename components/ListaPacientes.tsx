@@ -8,6 +8,7 @@ import { showSuccess, showError } from '@/lib/toast';
 import { copiarAlPortapapeles } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import { format } from 'date-fns';
+import { parsearFechaISOSegura } from '@/lib/utils-fechas';
 
 interface ListaPacientesProps {
   pacientes: Paciente[];
@@ -63,7 +64,10 @@ export default function ListaPacientes({
     const confirmacion = window.confirm(
       `¿Estás seguro de que deseas eliminar el turno?\n\n` +
       `Paciente: ${turno.pacientes.nombre} ${turno.pacientes.apellido}\n` +
-      `Fecha: ${format(new Date(turno.fecha), 'dd/MM/yyyy')}\n` +
+      `Fecha: ${turno.fecha ? (() => {
+        const fecha = parsearFechaISOSegura(turno.fecha);
+        return fecha ? format(fecha, 'dd/MM/yyyy') : turno.fecha;
+      })() : 'N/A'}\n` +
       `Hora: ${turno.hora}\n\n` +
       '⚠️ Esta acción NO se puede deshacer. El slot quedará disponible.'
     );
@@ -370,7 +374,10 @@ export default function ListaPacientes({
                               >
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs font-semibold text-gray-700">
-                                    {format(new Date(turno.fecha), 'dd/MM/yyyy')}
+                                    {(() => {
+                                      const fecha = parsearFechaISOSegura(turno.fecha);
+                                      return fecha ? format(fecha, 'dd/MM/yyyy') : turno.fecha;
+                                    })()}
                                   </span>
                                   <span className="text-xs font-medium text-gray-600">
                                     {turno.hora.slice(0, 5)}

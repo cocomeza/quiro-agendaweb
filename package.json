@@ -27,7 +27,14 @@
     "diagnose:login": "tsx scripts/diagnose-login.ts",
     "validate:env": "tsx scripts/validate-env.ts",
     "diagnose": "tsx scripts/diagnose.ts",
-    "clean:test-pacientes": "tsx scripts/eliminar-pacientes-test.ts"
+    "clean:test-pacientes": "tsx scripts/eliminar-pacientes-test.ts",
+    "buscar:pacientes": "tsx scripts/buscar-pacientes.ts",
+    "buscar:especifico": "tsx scripts/buscar-paciente-especifico.ts",
+    "migrar:faltantes": "tsx scripts/migrar-pacientes-faltantes.ts",
+    "verificar:faltantes": "tsx scripts/verificar-pacientes-faltantes.ts",
+    "migrar:todos-faltantes": "tsx scripts/migrar-todos-faltantes.ts",
+    "verificar:fechas-turnos": "tsx scripts/verificar-corregir-fechas-turnos.ts",
+    "corregir:fecha-carlos": "tsx scripts/corregir-fecha-turno-carlos.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",

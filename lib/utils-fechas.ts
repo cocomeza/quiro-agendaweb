@@ -1,8 +1,19 @@
 /**
- * Utilidades para manejo de fechas en zona horaria de Argentina (America/Argentina/Buenos_Aires)
+ * Utilidades para manejo de fechas en zona horaria de Argentina
+ * 
+ * 🌍 Zona horaria: Argentina Time (ART) - UTC−3
+ * 📍 Ubicación: Villa Ramallo, Provincia de Buenos Aires, Argentina
+ * ⏰ Horario: Permanente (no hay horario de verano)
  * 
  * IMPORTANTE: Estas funciones aseguran que las fechas se manejen correctamente
- * para el uso en Buenos Aires, Argentina, sin errores de zona horaria.
+ * para el uso en Argentina (UTC−3), sin errores de zona horaria.
+ * 
+ * El problema común: Cuando JavaScript hace `new Date('2026-01-12')`, 
+ * lo interpreta como UTC, lo que puede causar que se muestre el día anterior
+ * en zonas horarias negativas como Argentina (UTC−3).
+ * 
+ * Solución: Usar `new Date(año, mes - 1, dia)` que crea la fecha en hora local,
+ * respetando la configuración del navegador (UTC−3 para Argentina).
  */
 
 import { format, startOfDay, parseISO, isValid } from 'date-fns';
@@ -56,14 +67,58 @@ export function formatearMesAnio(fecha: Date): string {
 
 /**
  * Parsea una fecha desde formato ISO (yyyy-MM-dd) a objeto Date
+ * 
+ * ⚠️ IMPORTANTE: Usa hora local (Argentina UTC−3) para evitar problemas de zona horaria
+ * 
+ * Problema: Cuando JavaScript hace `new Date('2026-01-12')`, lo interpreta como UTC.
+ * En Argentina (UTC−3), esto puede causar que se muestre el día anterior:
+ * - `new Date('2026-01-12')` → `2026-01-12T00:00:00Z` (UTC)
+ * - En Argentina (UTC−3): `2026-01-11T21:00:00-03:00` → muestra día 11 ❌
+ * 
+ * Solución: Esta función parsea la fecha como hora local:
+ * - `new Date(2026, 0, 12)` → `2026-01-12T00:00:00-03:00` → muestra día 12 ✅
+ * 
+ * @param fechaStr - Fecha en formato ISO (yyyy-MM-dd)
+ * @returns Objeto Date en hora local (Argentina UTC−3)
  */
 export function parsearFechaISO(fechaStr: string): Date {
-  // date-fns parseISO maneja correctamente las fechas ISO
+  if (!fechaStr) {
+    throw new Error('Fecha vacía');
+  }
+  
+  // Si la fecha viene como "yyyy-MM-dd", parsearla como hora local
+  // para evitar problemas de zona horaria
+  if (fechaStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    const [año, mes, dia] = fechaStr.split('-').map(Number);
+    // Crear fecha en hora local (mes es 0-indexed en JavaScript)
+    const fecha = new Date(año, mes - 1, dia);
+    if (!isValid(fecha)) {
+      throw new Error(`Fecha ISO inválida: ${fechaStr}`);
+    }
+    return fecha;
+  }
+  
+  // Para otros formatos, usar parseISO de date-fns
   const fecha = parseISO(fechaStr);
   if (!isValid(fecha)) {
     throw new Error(`Fecha ISO inválida: ${fechaStr}`);
   }
   return fecha;
+}
+
+/**
+ * Parsea una fecha de forma segura, retornando null si es inválida
+ * Útil para casos donde la fecha puede ser opcional
+ */
+export function parsearFechaISOSegura(fechaStr: string | null | undefined): Date | null {
+  if (!fechaStr) {
+    return null;
+  }
+  try {
+    return parsearFechaISO(fechaStr);
+  } catch {
+    return null;
+  }
 }
 
 /**
