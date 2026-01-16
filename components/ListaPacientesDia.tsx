@@ -4,6 +4,8 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale/es';
 import type { TurnoConPaciente } from '@/lib/supabase/types';
 import { Printer } from 'lucide-react';
+import { generarPDFTurnos } from '@/lib/pdf';
+import { showSuccess, showError } from '@/lib/toast';
 
 interface ListaPacientesDiaProps {
   turnos: TurnoConPaciente[];
@@ -73,11 +75,30 @@ export default function ListaPacientesDia({ turnos, fecha }: ListaPacientesDiaPr
   }
 
   const handleImprimir = () => {
-    window.print();
+    try {
+      // Filtrar turnos que tengan pacientes válidos
+      const turnosParaPDF = turnosOrdenados.filter(t => 
+        t.pacientes && 
+        t.pacientes.nombre && 
+        t.pacientes.apellido
+      );
+      
+      if (turnosParaPDF.length === 0) {
+        showError('❌ No hay turnos para imprimir en este día');
+        return;
+      }
+
+      // Generar PDF usando jsPDF
+      generarPDFTurnos(turnosParaPDF, fecha);
+      showSuccess('✅ PDF generado exitosamente');
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      showError('❌ Error al generar el PDF');
+    }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow print-lista-pacientes">
+    <div className="bg-white rounded-lg shadow print-lista-pacientes" id="lista-pacientes-print">
       {/* Encabezado único - se adapta a pantalla e impresión */}
       <div className="px-4 sm:px-6 print:p-8 py-4 print:py-6 border-b print:border-b-2 print:border-gray-300">
         <div className="flex items-center justify-between print:flex-col print:text-center print:items-center">

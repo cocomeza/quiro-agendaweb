@@ -46,12 +46,24 @@ export function generarPDFTurnos(turnos: TurnoConPaciente[], fecha: Date) {
 
   // Preparar datos para la tabla
   const datosTabla = turnosOrdenados.map((turno) => {
+    // Formatear hora para mostrar solo HH:MM (sin segundos)
+    let horaFormateada = '-';
+    if (turno.hora) {
+      const horaStr = String(turno.hora);
+      // Si tiene formato HH:MM:SS, tomar solo HH:MM
+      if (horaStr.length >= 5) {
+        horaFormateada = horaStr.substring(0, 5);
+      } else {
+        horaFormateada = horaStr;
+      }
+    }
+    
     return [
       turno.pacientes?.numero_ficha || '-',
       turno.pacientes?.apellido || '-',
       turno.pacientes?.nombre || '-',
       turno.pacientes?.telefono || '-',
-      turno.hora || '-'
+      horaFormateada
     ];
   });
 
