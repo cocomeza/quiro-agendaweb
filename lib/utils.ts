@@ -1,4 +1,25 @@
 /**
+ * Calcula la próxima fecha de seguimiento (14 días después)
+ * Si cae en domingo, la mueve a lunes
+ * @param fechaBase - Fecha base para calcular
+ * @returns Fecha de seguimiento (14 días después, evitando domingos)
+ */
+export function calcularProximaFechaSeguimiento(fechaBase: Date): Date {
+  // Crear una copia de la fecha para no modificar la original
+  const fecha = new Date(fechaBase);
+  
+  // Agregar 14 días
+  fecha.setDate(fecha.getDate() + 14);
+  
+  // Si cae en domingo (0), moverlo a lunes (1)
+  if (fecha.getDay() === 0) {
+    fecha.setDate(fecha.getDate() + 1);
+  }
+  
+  return fecha;
+}
+
+/**
  * Copia texto al portapapeles
  */
 export async function copiarAlPortapapeles(texto: string): Promise<boolean> {
