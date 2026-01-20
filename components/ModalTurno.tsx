@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { format, addDays } from 'date-fns';
-import { parsearFechaISO, parsearFechaISOSegura, formatearFechaISO } from '@/lib/utils-fechas';
+import { format } from 'date-fns';
+import { parsearFechaISO, parsearFechaISOSegura } from '@/lib/utils-fechas';
 import { createClient } from '@/lib/supabase/client';
 import type { Paciente, TurnoConPaciente, TurnoConPago } from '@/lib/supabase/types';
 import { X, User, FileText, Trash2 } from 'lucide-react';
 import { showSuccess, showError } from '@/lib/toast';
 import { obtenerMensajeError, esErrorDeRed } from '@/lib/validaciones';
-import { FRANJAS_HORARIAS, calcularProximaFechaSeguimiento } from '@/lib/utils';
+import { FRANJAS_HORARIAS } from '@/lib/utils';
 import SelectorPaciente from './SelectorPaciente';
 
 interface ModalTurnoProps {
@@ -153,72 +153,13 @@ export default function ModalTurno({ turno, pacientes, fecha, onClose, onAbrirMo
 
         if (updateError) throw updateError;
         
-        // Si el turno se marcó como "completado" y antes no lo estaba, crear turno de seguimiento
-        const estadoAnterior = turno.estado;
-        const seMarcoComoCompletado = estado === 'completado' && estadoAnterior !== 'completado';
-        
-        if (seMarcoComoCompletado) {
-          try {
-            // Calcular fecha de seguimiento (14 días después, evitando domingos)
-            const fechaSeguimiento = calcularProximaFechaSeguimiento(fechaTurno);
-            const fechaSeguimientoStr = formatearFechaISO(fechaSeguimiento);
-            
-            // Verificar que no exista ya un turno (de cualquier paciente) en esa fecha/hora
-            // Esto evita conflictos con otros pacientes que puedan tener turnos en ese horario
-            const { data: turnoOcupado, error: checkSeguimientoError } = await supabase
-              .from('turnos')
-              .select('id, paciente_id')
-              .eq('fecha', fechaSeguimientoStr)
-              .eq('hora', hora)
-              .maybeSingle();
-            
-            if (checkSeguimientoError) {
-              console.error('Error al verificar turno de seguimiento:', checkSeguimientoError);
-            } else if (!turnoOcupado) {
-              // No hay ningún turno ocupando ese horario, crear turno de seguimiento automáticamente
-              const { error: insertSeguimientoError } = await supabase
-                .from('turnos')
-                .insert({
-                  paciente_id: pacienteId,
-                  fecha: fechaSeguimientoStr,
-                  hora,
-                  estado: 'programado',
-                  pago: 'impago',
-                  notas: `Turno de seguimiento automático (14 días después del ${format(fechaTurno, 'dd/MM/yyyy')})`,
-                });
-              
-              if (insertSeguimientoError) {
-                console.error('Error al crear turno de seguimiento:', insertSeguimientoError);
-                // No fallar el proceso principal si hay error al crear seguimiento
-              } else {
-                const fechaSeguimientoFormateada = format(fechaSeguimiento, 'dd/MM/yyyy');
-                showSuccess(`✅ Turno completado. Turno de seguimiento creado automáticamente para el ${fechaSeguimientoFormateada} a las ${hora}`);
-              }
-            } else {
-              // Ya existe un turno ocupando ese horario (puede ser del mismo paciente u otro)
-              const fechaSeguimientoFormateada = format(fechaSeguimiento, 'dd/MM/yyyy');
-              if (turnoOcupado.paciente_id === pacienteId) {
-                // Es del mismo paciente
-                showSuccess(`✅ Turno completado. Ya existe un turno programado para este paciente el ${fechaSeguimientoFormateada} a las ${hora}`);
-              } else {
-                // Es de otro paciente - el horario está ocupado
-                showSuccess(`✅ Turno completado. No se pudo crear turno de seguimiento automático: el horario ${fechaSeguimientoFormateada} a las ${hora} ya está ocupado por otro paciente. Puedes crear el turno manualmente en otro horario.`);
-              }
-            }
-          } catch (error) {
-            console.error('Error al crear turno de seguimiento:', error);
-            // No fallar el proceso principal
-          }
-        }
-        
-        // Mensaje informativo si se cambió la fecha o hora (solo si no se marcó como completado)
-        if ((fechaCambio || horaCambio) && !seMarcoComoCompletado) {
+        // Mensaje informativo si se cambió la fecha o hora
+        if (fechaCambio || horaCambio) {
           const fechaOriginalFormateada = obtenerFechaOriginalFormateada();
           showSuccess(`✅ Turno actualizado exitosamente. El slot anterior (${fechaOriginalFormateada} ${horaOriginal}) quedó liberado.`);
-        } else if (!seMarcoComoCompletado) {
+        } else {
           showSuccess('✅ Turno actualizado exitosamente');
         }
-        // Si se marcó como completado, el mensaje ya se mostró arriba con información del seguimiento
       } else {
         // Crear nuevo turno
         const { error: insertError } = await supabase
